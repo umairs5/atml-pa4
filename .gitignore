@@ -1,0 +1,26 @@
+# Python / IDE
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+.vscode/
+
+# Course data repo (cloned via scripts/setup; keep pinned revisions in configs/)
+atml-pa4-datasets/
+ATML_PA4.pdf
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.ckpt
+*.npz
+
+# HuggingFace cache if local
+.cache/
+hf_cache/
+
+# Logs / temporary artifacts
+logs/
+*.log
