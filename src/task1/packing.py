@@ -47,7 +47,8 @@ def pack_bits(values: torch.Tensor, bits: int) -> torch.Tensor:
         return (
             quads[:, 0] | (quads[:, 1] << 2) | (quads[:, 2] << 4) | (quads[:, 3] << 6)
         ).contiguous()
-    # bits == 3: pack blocks of 8 3-bit values into 3 bytes (24 bits)
+    # bits == 3: pack blocks of 8 3-bit values into 3 bytes (24 bits), trimmed to exact ceil(3n/8) bytes
+    out_bytes = math.ceil((n * 3) / 8)
     rem = n % 8
     if rem:
         flat = torch.cat([flat, torch.zeros(8 - rem, dtype=torch.uint8, device=flat.device)])
@@ -65,7 +66,7 @@ def pack_bits(values: torch.Tensor, bits: int) -> torch.Tensor:
     b0 = (packed24 & 0xFF).to(torch.uint8)
     b1 = ((packed24 >> 8) & 0xFF).to(torch.uint8)
     b2 = ((packed24 >> 16) & 0xFF).to(torch.uint8)
-    return torch.stack([b0, b1, b2], dim=-1).reshape(-1).contiguous()
+    return torch.stack([b0, b1, b2], dim=-1).reshape(-1)[:out_bytes].contiguous()
 
 
 def unpack_bits(packed: torch.Tensor, bits: int, num_elements: int) -> torch.Tensor:
@@ -85,6 +86,9 @@ def unpack_bits(packed: torch.Tensor, bits: int, num_elements: int) -> torch.Ten
         v3 = (packed >> 6) & 0x03
         return torch.stack([v0, v1, v2, v3], dim=-1).reshape(-1)[:num_elements]
     # bits == 3
+    rem_b = packed.numel() % 3
+    if rem_b:
+        packed = torch.cat([packed, torch.zeros(3 - rem_b, dtype=torch.uint8, device=packed.device)])
     triples = packed.reshape(-1, 3).to(torch.int32)
     packed24 = triples[:, 0] | (triples[:, 1] << 8) | (triples[:, 2] << 16)
     vals = [(packed24 >> (3 * k)) & 0x07 for k in range(8)]

@@ -117,9 +117,13 @@ def collect_output_fisher_scales(
     # We must ensure at least input embeddings or one tensor requires grad so autograd traverses blocks;
     # keeping eligible weights requires_grad=True is easy if we zero_grad each step and avoid optimizer states.
     prev_req = {}
-    for name, p in model.named_parameters():
+    for name, p in model.named_parameters(remove_duplicate=False):
         prev_req[name] = p.requires_grad
         p.requires_grad_(False)
+    # Keep input embeddings requiring grad so gradient checkpointing + full backward hooks fire cleanly
+    inp_emb = model.get_input_embeddings() if hasattr(model, "get_input_embeddings") else None
+    if inp_emb is not None and hasattr(inp_emb, "weight"):
+        inp_emb.weight.requires_grad_(True)
     for proj in projections:
         proj.module.weight.requires_grad_(True)
 
@@ -154,7 +158,7 @@ def collect_output_fisher_scales(
     finally:
         for h in handles:
             h.remove()
-        for name, p in model.named_parameters():
+        for name, p in model.named_parameters(remove_duplicate=False):
             p.requires_grad_(prev_req[name])
         if hasattr(model, "gradient_checkpointing_disable") and not had_gc:
             model.gradient_checkpointing_disable()

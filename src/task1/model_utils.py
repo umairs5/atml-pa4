@@ -114,7 +114,7 @@ def compute_unique_parameter_accounting(model: nn.Module) -> dict[str, int]:
         "other_uncompressed": 0,
     }
 
-    for name, param in model.named_parameters():
+    for name, param in model.named_parameters(remove_duplicate=False):
         key = _tensor_storage_key(param)
         if key in seen_storage:
             tied_duplicates += 1
