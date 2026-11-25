@@ -138,19 +138,31 @@ def main() -> None:
         )
         full_seq = torch.cat([p_ids, torch.tensor([draft_spec["generated_ids"]], dtype=torch.long, device=device)], dim=1)
         with torch.inference_mode():
-            direct_last = target_model(input_ids=full_seq[:, :-1], use_cache=False).logits[:, -1, :].float()
-            # Re-verify cache length + next step from draft_spec cache
+            direct_logits = target_model(input_ids=full_seq, use_cache=False).logits[:, -1, :].float()
             tc = draft_spec["_t_cache"]
             t_pend = draft_spec["_target_pending"]
-            cache_len_matches = (tc.layers[0].get_seq_length() == draft_spec["_l_cached"])
+            l_c = draft_spec["_l_cached"]
+            if t_pend is not None:
+                cache_len_matches = (tc.layers[0].get_seq_length() == l_c == full_seq.shape[1] - 1)
+                cached_logits = target_model(input_ids=t_pend, past_key_values=tc, use_cache=True).logits[:, -1, :].float()
+            else:
+                cache_len_matches = (tc.layers[0].get_seq_length() == l_c == full_seq.shape[1])
+                from transformers import DynamicCache
+
+                tc_crop = DynamicCache()
+                for li, lay in enumerate(tc.layers):
+                    tc_crop.update(lay.keys[:, :, : full_seq.shape[1] - 1, :].clone(), lay.values[:, :, : full_seq.shape[1] - 1, :].clone(), li)
+                cached_logits = target_model(input_ids=full_seq[:, -1:], past_key_values=tc_crop, use_cache=True).logits[:, -1, :].float()
+            cache_logit_max_diff = float((direct_logits - cached_logits).abs().max().item())
 
         val_res = {
             "tokenizer_and_chat_template_agree": tok_agrees,
             "markov_chi2": chi2_res,
             "self_speculative_acc_over_examined": self_spec["accepted_over_examined"],
             "real_model_cache_len_consistent": cache_len_matches,
+            "real_model_cache_logit_max_abs_diff": cache_logit_max_diff,
             "real_model_spec_n_gen": draft_spec["n_generated"],
-            "direct_logits_finite": bool(torch.isfinite(direct_last).all()),
+            "direct_logits_finite": bool(torch.isfinite(direct_logits).all()),
         }
         save_json(val_path, val_res)
         print(
@@ -322,7 +334,7 @@ def main() -> None:
         if adir_chk.exists() and not (resume and unm_path.exists()):
             print("Timing unmerged PEFT adapter wrapper overhead vs merged FP16...", flush=True)
             base_tmp = AutoModelForCausalLM.from_pretrained(DRAFT_ID, revision=d_rev, torch_dtype=torch.float16, attn_implementation="sdpa").to(device).eval()
-            unmerged = PeftModel.from_pretrained(base_tmp, str(adir_chk)).to(device).eval()
+            unmerged = PeftModel.from_pretrained(base_tmp, str(adir_chk)).to(device=device, dtype=torch.float16).eval()
             sub24 = test_prompts[:24]
             r_unm = benchmark_speculative_120_prompts("offpolicy_s6304_unmerged", unmerged, target_model, t_tok, sub24, device=device, gammas=(4,), repeats=1, max_new_tokens=64)
             r_mrg = benchmark_speculative_120_prompts("offpolicy_s6304_merged_24", merged_drafts["offpolicy_s6304"], target_model, t_tok, sub24, device=device, gammas=(4,), repeats=1, max_new_tokens=64)
@@ -352,3 +364,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

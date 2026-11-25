@@ -22,7 +22,7 @@ def _sample_from_probs(probs: torch.Tensor, generator: Optional[torch.Generator]
     """Sample one token index from a 1D probability vector."""
     if generator is not None and generator.device != probs.device:
         cdf = torch.cumsum(probs.float(), dim=-1)
-        u = float(torch.rand((), generator=generator).item())
+        u = float(torch.rand((), generator=generator, device=generator.device).item())
         u_t = torch.tensor(u, device=probs.device, dtype=cdf.dtype)
         idx = int(torch.searchsorted(cdf, u_t).item())
         return min(idx, probs.shape[-1] - 1)
@@ -30,9 +30,8 @@ def _sample_from_probs(probs: torch.Tensor, generator: Optional[torch.Generator]
 
 
 def _sample_uniform(generator: Optional[torch.Generator] = None, device: str | torch.device = "cpu") -> float:
-    if generator is not None and str(generator.device) != str(device):
-        return float(torch.rand((), generator=generator).item())
-    return float(torch.rand((), generator=generator, device=device).item())
+    dev = generator.device if generator is not None else device
+    return float(torch.rand((), generator=generator, device=dev).item())
 
 
 def _logits_to_probs(logits: torch.Tensor, temperature: float = 1.0, top_p: float = 1.0) -> torch.Tensor:
