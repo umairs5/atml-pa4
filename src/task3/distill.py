@@ -175,19 +175,20 @@ def prepare_offpolicy_teacher_pool(
                 inp[i, max_l - L :] = torch.tensor(seq, dtype=torch.long, device=device)
                 amask[i, max_l - L :] = 1
 
-            gen = torch.Generator(device=device).manual_seed(seed + (0 if domain == "math" else 50000) + start)
-            out_ids = teacher_model.generate(
-                input_ids=inp,
-                attention_mask=amask,
-                max_new_tokens=cap,
-                do_sample=True,
-                temperature=1.0,
-                top_p=1.0,
-                top_k=0,
-                pad_token_id=eos_id,
-                eos_token_id=eos_id,
-                generator=gen,
-            )
+            rollout_seed = seed + (0 if domain == "math" else 50000) + start
+            with torch.random.fork_rng(devices=[device] if device.type == "cuda" else []):
+                torch.manual_seed(rollout_seed)
+                out_ids = teacher_model.generate(
+                    input_ids=inp,
+                    attention_mask=amask,
+                    max_new_tokens=cap,
+                    do_sample=True,
+                    temperature=1.0,
+                    top_p=1.0,
+                    top_k=0,
+                    pad_token_id=eos_id,
+                    eos_token_id=eos_id,
+                )
             for i, x in enumerate(chunk):
                 resp = out_ids[i, max_l:].tolist()
                 # Trim trailing pad/eos past first EOS
@@ -306,20 +307,20 @@ def run_distillation(
             t_gen0 = time.perf_counter()
             student.eval()
             p_tensor = torch.tensor([p_ids], dtype=torch.long, device=device)
-            gen = torch.Generator(device=device).manual_seed(r_seed)
             with torch.inference_mode():
                 with torch.amp.autocast("cuda", dtype=torch.float16, enabled=(device.type == "cuda")):
-                    out_seq = student.generate(
-                        input_ids=p_tensor,
-                        max_new_tokens=cap,
-                        do_sample=True,
-                        temperature=1.0,
-                        top_p=1.0,
-                        top_k=0,
-                        pad_token_id=eos_id,
-                        eos_token_id=eos_id,
-                        generator=gen,
-                    )[0, len(p_ids) :].tolist()
+                    with torch.random.fork_rng(devices=[device] if device.type == "cuda" else []):
+                        torch.manual_seed(r_seed)
+                        out_seq = student.generate(
+                            input_ids=p_tensor,
+                            max_new_tokens=cap,
+                            do_sample=True,
+                            temperature=1.0,
+                            top_p=1.0,
+                            top_k=0,
+                            pad_token_id=eos_id,
+                            eos_token_id=eos_id,
+                        )[0, len(p_ids) :].tolist()
             if device.type == "cuda":
                 torch.cuda.synchronize(device)
             student_rollout_sec += time.perf_counter() - t_gen0

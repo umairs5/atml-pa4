@@ -105,18 +105,18 @@ def generate_student_or_spec_prefix_bank(
             )
             seq = out["generated_ids"]
         else:
-            gen = torch.Generator(device=device).manual_seed(gen_seed)
-            seq = draft_model.generate(
-                input_ids=p_tensor,
-                max_new_tokens=192,
-                do_sample=True,
-                temperature=1.0,
-                top_p=1.0,
-                top_k=0,
-                generator=gen,
-                pad_token_id=eos_id,
-                eos_token_id=eos_id,
-            )[0, len(p_ids) :].tolist()
+            with torch.random.fork_rng(devices=[device] if device.type == "cuda" else []):
+                torch.manual_seed(gen_seed)
+                seq = draft_model.generate(
+                    input_ids=p_tensor,
+                    max_new_tokens=192,
+                    do_sample=True,
+                    temperature=1.0,
+                    top_p=1.0,
+                    top_k=0,
+                    pad_token_id=eos_id,
+                    eos_token_id=eos_id,
+                )[0, len(p_ids) :].tolist()
 
         for pos in _sample_bank_positions(pid, bank_name, len(seq)):
             records.append({
