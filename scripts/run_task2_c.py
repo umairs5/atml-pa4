@@ -54,6 +54,17 @@ def main() -> None:
     rev = env_meta.get("source_revisions", {}).get("revisions", {}).get("model_target")
     (args.output_dir / "env.json").write_text(json.dumps(env_meta, indent=2), encoding="utf-8")
 
+    # Early exit if all C1/C5/policy outputs already exist
+    expected_files = [
+        args.output_dir / "c5_packed_encode_decode_bench.json",
+        args.output_dir / "c1_equivalence_checks.json",
+        args.output_dir / "token_length_audit.json",
+        *(policies_dir / f"{p}.jsonl.gz" for p in POLICIES),
+    ]
+    if resume and all(p.exists() for p in expected_files):
+        print("All Part C outputs already exist; skipping model load.", flush=True)
+        return
+
     # 1. C5 Standalone Packed Encode/Decode Benchmark (independent of full model)
     c5_bench_path = args.output_dir / "c5_packed_encode_decode_bench.json"
     if not (resume and c5_bench_path.exists()):
@@ -192,3 +203,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
