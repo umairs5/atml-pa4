@@ -196,10 +196,10 @@ def benchmark_attention_suite(
     for L in lengths:
         # Build FP32 reference first (unless infeasible due to OOM)
         gen = torch.Generator(device="cpu").manual_seed(6304 + L)
-        q32 = torch.randn(B, H, L, d_h, generator=gen, dtype=torch.float32, device=dev)
-        k32 = torch.randn(B, H, L, d_h, generator=gen, dtype=torch.float32, device=dev)
-        v32 = torch.randn(B, H, L, d_h, generator=gen, dtype=torch.float32, device=dev)
-        g32 = torch.randn(B, H, L, d_h, generator=gen, dtype=torch.float32, device=dev)
+        q32 = torch.randn(B, H, L, d_h, generator=gen, dtype=torch.float32).to(dev)
+        k32 = torch.randn(B, H, L, d_h, generator=gen, dtype=torch.float32).to(dev)
+        v32 = torch.randn(B, H, L, d_h, generator=gen, dtype=torch.float32).to(dev)
+        g32 = torch.randn(B, H, L, d_h, generator=gen, dtype=torch.float32).to(dev)
 
         ref_out32 = None
         ref_grads32 = None
