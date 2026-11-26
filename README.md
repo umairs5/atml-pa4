@@ -59,7 +59,7 @@ python scripts/check_setup.py
 cd ../atml-pa4
 ```
 
-> **Compatibility Note (`transformers==4.57.1`):** Upstream `setup_data.py --prefix-banks` passes `generator=` into `model.generate()`, which raises a `ValueError` in pinned `transformers==4.57.1`. We provide `scripts/generate_prefix_banks_compat.py`, which wraps generation with `torch.random.fork_rng` + `torch.manual_seed` to preserve exact upstream prompt ordering, seeds, temperature (`0.7`), and sampled positions.
+> **Compatibility Note (`transformers==4.57.1`):** Upstream `setup_data.py --prefix-banks` passes `generator=` into `model.generate()`, which raises a `ValueError` in pinned `transformers==4.57.1`. We provide `scripts/generate_prefix_banks_compat.py`, which wraps generation with `torch.random.fork_rng` + `torch.manual_seed` to preserve exact upstream prompt ordering, seeds, temperature (`1.0`, `top_p=1.0`), and sampled positions.
 
 ### 2. Run Unit Tests
 ```bash
