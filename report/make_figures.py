@@ -179,7 +179,7 @@ def make_fig3():
     ax.set_title("Prefix alignment by workload")
     ax.legend(loc="upper left", frameon=True, framealpha=0.92, fontsize=6.8)
 
-    # Right: Decode time breakdown vs target-only
+    # Right: Decode time breakdown vs target-only (all 4 timing components separate)
     ax = axes[1]
     bars = [
         ("Orig\ng=2", ["original"], 2),
@@ -190,56 +190,90 @@ def make_fig3():
         ("On-P\ng=4", ["onpolicy_s6304", "onpolicy_s6305"], 4),
     ]
     xb = np.arange(len(bars))
-    d_ms, v_ms, o_ms, tgt_ms = [], [], [], []
+    d_ms, v_ms, a_ms, c_ms, tgt_ms = [], [], [], [], []
     for _, drafts, g in bars:
         sub = [r for r in sp if r["draft"] in drafts and int(r["gamma"]) == g]
         d = statistics.mean(float(r["draft_proposal_ms_mean"]) for r in sub)
         v = statistics.mean(float(r["target_verify_ms_mean"]) for r in sub)
-        o = statistics.mean(float(r["accept_residual_ms_mean"]) + float(r["cache_update_ms_mean"]) for r in sub)
-        d_ms.append(d); v_ms.append(v); o_ms.append(o)
-        tgt_ms.append((d + v + o) * statistics.mean(float(r["measured_speedup_decode"]) for r in sub))
+        a = statistics.mean(float(r["accept_residual_ms_mean"]) for r in sub)
+        c = statistics.mean(float(r["cache_update_ms_mean"]) for r in sub)
+        d_ms.append(d); v_ms.append(v); a_ms.append(a); c_ms.append(c)
+        tgt_ms.append((d + v + a + c) * statistics.mean(float(r["measured_speedup_decode"]) for r in sub))
 
+    b2 = [d + v for d, v in zip(d_ms, v_ms)]
+    b3 = [x + a for x, a in zip(b2, a_ms)]
     ax.bar(xb, d_ms, width=0.55, color="C1", label="Draft proposal")
     ax.bar(xb, v_ms, width=0.55, bottom=d_ms, color="C0", label="Target verify")
-    ax.bar(xb, o_ms, width=0.55, bottom=[a + b for a, b in zip(d_ms, v_ms)], color="C2", label="Accept + cache")
+    ax.bar(xb, a_ms, width=0.55, bottom=b2, color="C2", label="Accept/residual")
+    ax.bar(xb, c_ms, width=0.55, bottom=b3, color="C4", label="Cache update")
     ax.axhline(statistics.mean(tgt_ms), color="C3", ls="--", lw=1.2, label=f"Target-only ({statistics.mean(tgt_ms):.0f} ms)")
     ax.set_xticks(xb)
     ax.set_xticklabels([b[0] for b in bars], fontsize=7.2)
-    ax.set_ylim(0, 1850)
+    ax.set_ylim(0, 1950)
     ax.set_ylabel("Mean decode time per prompt (ms)")
-    ax.set_title("Speculative round-time breakdown")
-    ax.legend(loc="upper left", ncol=2, frameon=True, framealpha=0.92, fontsize=6.5, columnspacing=0.6)
+    ax.set_title("Speculative round-time breakdown (4 components)")
+    ax.legend(loc="upper left", ncol=2, frameon=True, framealpha=0.92, fontsize=6.2, columnspacing=0.5)
 
     save(fig, "fig3_task3")
 
 
 # =============================================================================
-# APPENDIX FIGURE 4 (Task 1): Q3 bit map + Calibration error vs WT2 NLL
+# APPENDIX FIGURE 4 (Task 1): P3/Q3 sensitivities + Q3 bit map + Drift vs NLL
 # =============================================================================
 def make_fig4_app():
     rows = list(csv.DictReader(open(RES / "task1" / "summary_task1.csv")))
-    q3_3 = json.load(open(RES / "task1" / "conditions" / "q3_mixed_int3.json"))["meta"]["bit_map"]
+    p3_meta = json.load(open(RES / "task1" / "conditions" / "p3_nonuniform_s50.json"))["meta"]
+    q3_meta = json.load(open(RES / "task1" / "conditions" / "q3_mixed_int3.json"))["meta"]
+    p3_sens = p3_meta["sensitivity"]
+    q3_sens = q3_meta["sensitivity"]
+    q3_3 = q3_meta["bit_map"]
 
-    fig, axes = plt.subplots(1, 2, figsize=(8.8, 2.75), gridspec_kw={"wspace": 0.30})
+    fig, axes = plt.subplots(2, 2, figsize=(8.8, 5.1), gridspec_kw={"wspace": 0.28, "hspace": 0.38})
 
-    # Left: Q3 INT3 bit map
-    ax = axes[0]
+    # Top-left: P3 ShortGPT BI sensitivity scores across 28 blocks
+    ax = axes[0, 0]
+    layers = list(range(28))
+    bi_vals = [p3_sens[f"block_{li}"] for li in layers]
+    ax.bar(layers, bi_vals, width=0.72, color="C0")
+    ax.set_xlabel("Decoder block")
+    ax.set_ylabel("ShortGPT Block Influence (BI)")
+    ax.set_title("(a) P3 sensitivity: ShortGPT BI per block")
+
+    # Top-right: Q3 Taylor sensitivity by projection type (raw vs per-Mparam)
+    ax = axes[0, 1]
     projs = ["self_attn.q_proj", "self_attn.k_proj", "self_attn.v_proj", "self_attn.o_proj",
              "mlp.gate_proj", "mlp.up_proj", "mlp.down_proj"]
-    plbls = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+    plbls = ["q", "k", "v", "o", "gate", "up", "down"]
+    # Exact parameter counts per projection in Qwen2.5-1.5B (from p2 meta)
+    p2_pp = json.load(open(RES / "task1" / "conditions" / "p2_wanda_s50.json"))["meta"]["per_projection"]
+    numels = {item["proj_type"]: item["numel"] for item in p2_pp}
+    pt_keys = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+    mean_per_mp = []
+    for pr, pk in zip(projs, pt_keys):
+        vals = [q3_sens[f"model.layers.{li}.{pr}"] / (numels[pk] / 1e6) for li in range(28)]
+        mean_per_mp.append(statistics.mean(vals))
+    ax.bar(np.arange(len(plbls)), mean_per_mp, width=0.62, color="C1")
+    ax.set_xticks(np.arange(len(plbls)))
+    ax.set_xticklabels(plbls)
+    ax.set_xlabel("Projection type")
+    ax.set_ylabel("Mean Taylor sensitivity / Mparams")
+    ax.set_title("(b) Q3 sensitivity density (explains v/k upgrades)")
+
+    # Bottom-left: Q3 INT3 bit map
+    ax = axes[1, 0]
     mat = np.array([[q3_3[f"model.layers.{li}.{pr}"] for li in range(28)] for pr in projs])
     im = ax.imshow(mat, aspect="auto", cmap="viridis", vmin=2, vmax=4)
     ax.set_yticks(np.arange(len(projs)))
-    ax.set_yticklabels(plbls, fontsize=7.2)
+    ax.set_yticklabels(pt_keys, fontsize=7.0)
     ax.set_xticks([0, 7, 14, 21, 27])
     ax.set_xlabel("Decoder layer")
-    ax.set_title("Q3-INT3 bit allocation (2 / 3 / 4-bit)")
+    ax.set_title("(c) Q3-INT3 bit allocation (2 / 3 / 4-bit)")
     ax.grid(False)
     cbar = fig.colorbar(im, ax=ax, ticks=[2, 3, 4], pad=0.03, fraction=0.05)
     cbar.ax.tick_params(labelsize=7)
 
-    # Right: Calibration drift vs WT2 NLL
-    ax = axes[1]
+    # Bottom-right: Calibration drift vs WT2 NLL
+    ax = axes[1, 1]
     px, py, qx, qy = [], [], [], []
     for r in rows:
         if not r["final_block_cum_rel_l2"]:
@@ -250,34 +284,36 @@ def make_fig4_app():
             px.append(x); py.append(y)
         else:
             qx.append(x); qy.append(y)
-    ax.scatter(px, py, color="C1", marker="o", s=34, label="Pruning (P1-P3)")
-    ax.scatter(qx, qy, color="C0", marker="D", s=30, label="Quantization (Q1-Q3)")
+    ax.scatter(px, py, color="C1", marker="o", s=34, label="Pruning (rho = 0.933)")
+    ax.scatter(qx, qy, color="C0", marker="D", s=30, label="Quantization (rho = 0.976)")
     ax.set_xlabel("Final-block cumulative relative L2 error")
     ax.set_ylabel("Held-out WikiText-2 NLL")
-    ax.set_title("Calibration error vs. held-out NLL (rho = 0.971)")
-    ax.legend(loc="upper left", frameon=True, framealpha=0.9)
+    ax.set_title("(d) Calibration drift vs. WT2 NLL (all rho = 0.971)")
+    ax.legend(loc="upper left", frameon=True, framealpha=0.9, fontsize=7.0)
 
     save(fig, "fig4_app_task1")
 
 
 # =============================================================================
-# APPENDIX FIGURE 5 (Task 2): MQAR learning curves + inference memory + Part C pos
+# APPENDIX FIGURE 5 (Task 2): MQAR curves (K=4,8,16) + Memory + Part C Pos & Dist
 # =============================================================================
 def make_fig5_app():
     runs_dir = RES / "task2" / "part_b" / "runs"
     inf = json.load(open(RES / "task2" / "part_b" / "inference_sweep.json"))
     bk = list(csv.DictReader(open(RES / "task2" / "analysis" / "part_c_breakdowns.csv")))
 
-    fig, axes = plt.subplots(1, 3, figsize=(9.8, 2.7), gridspec_kw={"wspace": 0.30})
+    fig, axes = plt.subplots(2, 2, figsize=(8.8, 5.1), gridspec_kw={"wspace": 0.28, "hspace": 0.38})
 
-    # Panel 1: MQAR learning curves (K=16 mixed)
-    ax = axes[0]
+    # Top-left: MQAR learning curves across K=4, 8, 16
+    ax = axes[0, 0]
     for prefix, lbl, col, ls in [
-        ("B1_dense_K16_mixed", "Dense", "C0", "-"),
-        ("B3_topk_64_K16_mixed", "Top-k=64", "C2", "-"),
-        ("B2_linear_elu1_K16_mixed", "Linear (3 seeds)", "C4", "--"),
-        ("B1_sliding_w64_K16_mixed", "Sliding (mixed)", "C3", ":"),
-        ("B2_local_dilated_K16_mixed", "Local+dilated", "0.45", "-."),
+        ("B1_dense_K16_mixed", "Dense (K=16)", "C0", "-"),
+        ("B3_topk_64_K16_mixed", "Top-k=64 (K=16)", "C2", "-"),
+        ("B2_linear_elu1_K4_mixed", "Linear (K=4, mean)", "C4", ":"),
+        ("B2_linear_elu1_K8_mixed", "Linear (K=8, 3s)", "C1", "--"),
+        ("B2_linear_elu1_K16_mixed", "Linear (K=16, 3s)", "C4", "--"),
+        ("B1_sliding_w64_K16_mixed", "Sliding (K=16 mixed)", "C3", "-."),
+        ("B2_local_dilated_K16_mixed", "Local+dil (K=16)", "0.45", ":"),
     ]:
         curves = []
         steps = None
@@ -286,18 +322,18 @@ def make_fig5_app():
             steps = [pt["step"] for pt in lc]
             accs = [pt["dev_acc"] * 100 for pt in lc]
             curves.append(accs)
-            if "linear" in prefix:
-                ax.plot(steps, accs, color=col, ls=ls, lw=1.0, label=lbl if s == 6304 else None)
-        if "linear" not in prefix:
-            ax.plot(steps, np.mean(curves, axis=0), color=col, ls=ls, lw=1.4, label=lbl)
+            if prefix in ("B2_linear_elu1_K8_mixed", "B2_linear_elu1_K16_mixed"):
+                ax.plot(steps, accs, color=col, ls=ls, lw=0.9, alpha=0.85, label=lbl if s == 6304 else None)
+        if prefix not in ("B2_linear_elu1_K8_mixed", "B2_linear_elu1_K16_mixed"):
+            ax.plot(steps, np.mean(curves, axis=0), color=col, ls=ls, lw=1.35, label=lbl)
     ax.set_xlabel("Optimizer update")
     ax.set_ylabel("Dev recall accuracy (%)")
-    ax.set_title("MQAR learning curves (K=16)")
-    ax.set_ylim(-2, 106)
-    ax.legend(loc="center left", bbox_to_anchor=(0.01, 0.45), frameon=True, framealpha=0.9, fontsize=6.2)
+    ax.set_title("(a) MQAR learning curves (K=4, 8, 16)")
+    ax.set_ylim(-2, 108)
+    ax.legend(loc="upper left", frameon=True, framealpha=0.92, fontsize=5.6, borderpad=0.3, handlelength=1.8)
 
-    # Panel 2: Part B inference memory
-    ax = axes[1]
+    # Top-right: Part B inference memory
+    ax = axes[0, 1]
     for mech, lbl, col, mk, ls in [
         ("dense", "Dense", "C0", "o", "-"),
         ("sliding_w64", "Sliding (masked)", "C1", "s", "--"),
@@ -313,11 +349,11 @@ def make_fig5_app():
     ax.set_xticklabels(["256", "1k", "4k", "8k"])
     ax.set_xlabel("Sequence length T")
     ax.set_ylabel("Peak allocated memory (MiB)")
-    ax.set_title("Part B: Inference memory")
-    ax.legend(loc="upper left", frameon=True, framealpha=0.9, fontsize=6.3)
+    ax.set_title("(b) Part B: Forward inference memory")
+    ax.legend(loc="upper left", frameon=True, framealpha=0.9, fontsize=6.5)
 
-    # Panel 3: Part C exact match by evidence position
-    ax = axes[2]
+    # Bottom-left: Part C exact match by evidence position
+    ax = axes[1, 0]
     pols = [("full_fp16", "FP16"), ("evict_sink_recent", "Sink"), ("evict_question_aware", "Q-Aw"),
             ("quant_int4_tok", "Tok4"), ("quant_int4_kivi", "KIVI4"), ("hybrid_fp16_int2", "Hyb")]
     x = np.arange(len(pols))
@@ -326,11 +362,23 @@ def make_fig5_app():
         vals = [float([r for r in bk if r["policy"] == p and r["factor"] == "position" and r["level"] == pos][0]["exact_match"]) * 100 for p, _ in pols]
         ax.bar(x + (idx - 1) * w, vals, width=w, color=col, label=lbl)
     ax.set_xticks(x)
-    ax.set_xticklabels([p[1] for p in pols], fontsize=7.0)
+    ax.set_xticklabels([p[1] for p in pols], fontsize=7.2)
     ax.set_ylim(0, 118)
     ax.set_ylabel("Exact match (%)")
-    ax.set_title("Part C: Accuracy by position")
-    ax.legend(loc="upper right", ncol=3, frameon=True, framealpha=0.9, fontsize=6.2, columnspacing=0.4)
+    ax.set_title("(c) Part C: Accuracy by evidence position")
+    ax.legend(loc="upper right", ncol=3, frameon=True, framealpha=0.9, fontsize=6.5, columnspacing=0.4)
+
+    # Bottom-right: Part C exact match by distractor count
+    ax = axes[1, 1]
+    for idx, (lvl, lbl, col) in enumerate([("0", "0 dist", "C0"), ("2", "2 dist", "C1"), ("8", "8 dist", "C3")]):
+        vals = [float([r for r in bk if r["policy"] == p and r["factor"] == "distractors" and r["level"] == lvl][0]["exact_match"]) * 100 for p, _ in pols]
+        ax.bar(x + (idx - 1) * w, vals, width=w, color=col, label=lbl)
+    ax.set_xticks(x)
+    ax.set_xticklabels([p[1] for p in pols], fontsize=7.2)
+    ax.set_ylim(0, 118)
+    ax.set_ylabel("Exact match (%)")
+    ax.set_title("(d) Part C: Accuracy by distractor count")
+    ax.legend(loc="upper right", ncol=3, frameon=True, framealpha=0.9, fontsize=6.5, columnspacing=0.4)
 
     save(fig, "fig5_app_task2")
 
@@ -376,7 +424,7 @@ def make_fig6_app():
         return ((1.0 - a**(g + 1)) / (1.0 - a)) / (g * c + v)
     ax.plot(alphas * 100, shat(alphas, 2, c_meas, v2), color="C0", lw=1.4, label=f"Model g=2 (c={c_meas:.2f})")
     ax.plot(alphas * 100, shat(alphas, 4, c_meas, v4), color="C1", lw=1.4, label=f"Model g=4 (c={c_meas:.2f})")
-    ax.plot(alphas * 100, shat(alphas, 4, 0.25, 1.15), color="C2", ls="--", lw=1.2, label="Counterfactual g=4 (c=0.25)")
+    ax.plot(alphas * 100, shat(alphas, 4, 0.25, v4), color="C2", ls="--", lw=1.2, label=f"Counterfactual g=4 (c=0.25, v={v4:.2f})")
     ax.axhline(1.0, color="0.4", ls=":", lw=0.9)
     for g, col, mk in [(2, "C0", "o"), (4, "C1", "s")]:
         sub = [r for r in sp if int(r["gamma"]) == g]

@@ -48,49 +48,45 @@ Pruning, Quantization, Attention Memory, and Speculative Decoding}
 \maketitle
 
 \begin{abstract}
-In this assignment, I ran three sets of experiments to see what actually happens when we try to make language models cheaper to store and run. First, I pruned and quantized \texttt{Qwen2.5-1.5B} across 18 post-training conditions. Activation-aware methods worked much better than naive ones: at 50\% sparsity, Wanda cut WikiText-2 perplexity from 127.80 (magnitude) to 25.50 and lifted HellaSwag normalized accuracy by 18.15 points, while 4-bit AWQ reached 17.56 perplexity and 68.20\% HellaSwag at less than half the packed size of 50\% pruning. Dev-selected non-uniform pruning (ShortGPT Block Influence) kept 75\% sparsity from blowing up (428.5 vs. 63,325 perplexity), and mixed-precision Taylor MILP gave a small HellaSwag gain at 3-bit, though dense FP16 execution kept GPU memory and latency flat. Second, I tested attention kernels, associative recall, and KV-cache compression. FlashAttention via SDPA used 42.8 times less FP16 memory and ran 146 times faster than dense attention at length 8,192, while my pure-Python tiled loop was over 3,400 times slower. On matched-parameter MQAR (436,736 params), sliding windows failed past their 126-token receptive field, linear attention stalled on one of three seeds at $K=8$ and $K=16$, and top-$k$ attention ($k=64$) reached 100\% recall on all seeds. On 180 long-context retrieval prompts with \texttt{Qwen2.5-1.5B-Instruct} at a matched INT4 KV budget, per-token INT4 collapsed to 0\% accuracy, whereas KIVI (per-channel keys, per-token values) kept 100\% and my FP16/INT2 hybrid reached 99.4\%, though unpacking packed caches in PyTorch slowed single-batch decoding by 6.2 times. Third, I implemented exact speculative sampling and distilled \texttt{Qwen2.5-0.5B-Instruct} toward \texttt{Qwen2.5-1.5B-Instruct} with LoRA over 40,000 tokens. Distillation lowered prefix KL and raised live $\gamma=2$ acceptance by 1.98 to 2.75 points (cutting target passes to 0.39/token), while on-policy training cost 4.66 times more wall time than off-policy (1,942\,s vs. 417\,s). Even so, eager batch-1 speculative decoding ran slower than target-only (27.1 vs. 33.3 tok/s) because a 24-layer 0.5B draft step took 83\% as long as a 28-layer 1.5B target step. Code, configurations, and results: \url{https://github.com/umairs5/atml-pa4}.
+I ran three sets of experiments on an NVIDIA L4 to test how post-training compression, efficient attention, and distilled speculative decoding behave in practice. First, across 18 post-training conditions on \texttt{Qwen2.5-1.5B}, activation-aware scoring dominated naive baselines: 50\% Wanda cut WikiText-2 perplexity from 127.80 (magnitude) to 25.50 (+18.15 HellaSwag normalized points), while 4-bit AWQ reached 17.56 perplexity and 68.20\% HellaSwag at 59\% of the packed size of 50\% pruning. Dev-selected ShortGPT Block Influence reduced 75\% collapse from 63,325 to 428.5 perplexity (still degraded at 32.8\% HellaSwag), and 3-bit Taylor MILP improved raw HellaSwag, though dense FP16 execution kept GPU memory and latency flat. Second, FlashAttention via SDPA used 42.8$\times$ less FP16 memory and ran 146$\times$ faster than dense attention at length 8,192, whereas Python tiling was over 3,400$\times$ slower. On matched-parameter MQAR (436,736 params), sliding windows failed past 126 tokens, linear attention stalled on 1/3 seeds at $K\in\{8,16\}$, and top-$k$ ($k=64$) reached 100\% recall. On 180 long-context retrieval prompts (\texttt{Qwen2.5-1.5B-Instruct}, matched INT4 KV budget), per-token INT4 collapsed to 0\%, whereas KIVI kept 100\% and an FP16/INT2 hybrid hit 99.4\%, though PyTorch unpacking slowed batch-1 decode by 6.2$\times$. Third, speculative decoding (\texttt{Qwen2.5-0.5B-Instruct} draft) cut target passes to 0.39/token ($\gamma=2$), and 40k-token LoRA distillation raised $\gamma=2$ acceptance by 1.5--1.8 points pooled (2.0--2.8 prompt-mean), with on-policy training 4.66$\times$ slower than off-policy. Still, eager batch-1 speculative decoding trailed target-only (27.1 vs. 33.3\,tok/s) because a 24-layer draft step cost 83\% of a 28-layer target step. Code and results: \url{https://github.com/umairs5/atml-pa4}.
 \end{abstract}
 
 \section{Introduction}
-Efficiency papers often highlight theoretical compression ratios, fewer attended token pairs, or fewer target forward passes, which makes it easy to assume those numbers automatically translate into faster or lighter inference. In practice, two separate things matter: whether the approximation survives how real models store information (like outlier channels or long-range associations), and whether the available GPU kernels can actually turn a smaller representation into lower latency and memory.
-
-Below I test both questions across model compression (Task 1), attention and KV memory (Task 2), and distilled speculative decoding (Task 3). All GPU runs used a single NVIDIA L4 (24\,GB, \texttt{sm\_89}) on Colab with Python 3.13.16, PyTorch 2.14.1+cu130 \citep{paszke2019pytorch}, \texttt{transformers==4.57.1} \citep{wolf2020transformers}, \texttt{huggingface\_hub==0.36.2}, PEFT \citep{mangrulkar2022peft}, and seed 6304. All model and dataset commit SHAs are locked in \texttt{configs/local\_source\_revisions.json} (Appendix~\ref{app:setup}). Throughout, I keep packed storage separate from allocated GPU memory, percentage points separate from relative changes, and analytical speedups separate from measured throughput. All paired intervals use 2,000 bootstrap resamples \citep{efron1993bootstrap}.
+Efficiency papers often highlight theoretical compression ratios, fewer attended pairs, or fewer target passes. In practice, two questions decide whether those gains hold: whether the approximation respects model geometry (activation outliers, long-range associations, key-channel structure), and whether GPU kernels convert smaller representations into real memory and latency savings. I test both across model compression (Task 1), attention and KV memory (Task 2), and distilled speculative decoding (Task 3) on a single NVIDIA L4 (24\,GB, \texttt{sm\_89}; Python 3.13.16, PyTorch 2.14.1+cu130 \citep{paszke2019pytorch}, \texttt{transformers==4.57.1} \citep{wolf2020transformers}, PEFT \citep{mangrulkar2022peft}, seed 6304; revisions locked in Appendix~\ref{app:setup}). Throughout, I separate packed storage from allocated VRAM, percentage points from relative ratios, and analytical speedups from measured throughput, using 2,000-resample paired bootstrap 95\% CIs \citep{efron1993bootstrap}.
 
 \section{Task 1: Model Compression}
 
 \paragraph{Setup and accounting.}
-Every condition starts from an independent copy of unchanged FP16 \texttt{Qwen/Qwen2.5-1.5B} \citep{qwen2025qwen25} with no fine-tuning. The model has 28 blocks and 196 eligible linear projections (\texttt{q/k/v/o/gate/up/down}) totaling 1,310,195,712 weights (2,620.4\,MB). Embeddings (233,373,696), norms (87,552), and biases (57,344) remain uncompressed (233,518,592 parameters, 467.0\,MB). Because \texttt{embed\_tokens} and \texttt{lm\_head} are tied, I count that shared tensor once: 1,543,714,304 unique parameters and 3,087,428,608 FP16 bytes (2,944.4\,MiB).
-
-All calibration probes use the locked 128-sequence C4 calibration set (512 tokens each; \citealp{raffel2020c4}). Any P3 or Q3 choice was made strictly on the separate 32-sequence C4 dev set (512 tokens each) before checking test splits. Evaluation uses 50,000-token perplexity and NLL on WikiText-2 (437 windows; \citealp{merity2017wikitext}) and C4 validation (177 windows), plus zero-shot HellaSwag \citep{zellers2019hellaswag} (\texttt{lm-evaluation-harness} prompt format, raw \texttt{acc} and character-normalized \texttt{acc\_norm}) on 2,000 prompts for primary conditions and the first 512 prompts for all 18. Latency uses five warmed-up CUDA-synchronized repeats for prefill (512 and 2,048 tokens) and 64-token decode.
+Every condition starts from an independent copy of FP16 \texttt{Qwen/Qwen2.5-1.5B} \citep{qwen2025qwen25} with no fine-tuning: 28 blocks and 196 eligible projections (\texttt{q/k/v/o/gate/up/down}, 1,310,195,712 weights, 2,620.4\,MB), plus 233,518,592 uncompressed parameters (233,373,696 embeddings, 87,552 norms, 57,344 biases; 467.0\,MB). Counting tied \texttt{embed\_tokens}/\texttt{lm\_head} once gives 1,543,714,304 unique parameters = 3,087,428,608 FP16 bytes (2,944.4\,MiB). Calibration uses 128 C4 sequences (512 tokens; \citealp{raffel2020c4}), with all P3/Q3 choices made on the separate 32-sequence C4 dev split. Evaluation uses 50,000-token PPL/NLL on WikiText-2 (437 windows; \citealp{merity2017wikitext}) and C4 validation (177 windows), zero-shot HellaSwag \citep{zellers2019hellaswag} (raw \texttt{acc} and \texttt{acc\_norm} on 2,000 prompts for primary runs, 512 for all 18), and 5-repeat CUDA-synchronized prefill/decode timings.
 
 \begin{table}[t]
 \centering\footnotesize
-\caption{Task 1 results on \texttt{Qwen2.5-1.5B} (L4, FP16 dense execution, $N=50{,}000$ scored tokens/split). FP16 baseline mean NLL is 2.779 (WT2) and 2.706 (C4); every condition's mean NLL equals $\ln(\text{PPL})$ (e.g., 50\% Wanda 3.239 vs. Mag 4.850; INT4 AWQ 2.865 vs. RTN 2.939; INT3 AWQ 3.272 vs. RTN 3.702). Packed MiB includes uncompressed tensors, 1-bit sparse masks or group-128 scales/zeros, and AWQ channel scales (0.08\,MiB). HS-2k and HS-512 show \texttt{acc\_norm} (\%).}
+\caption{Task 1 results on \texttt{Qwen2.5-1.5B} (L4, FP16 dense execution, $N=50{,}000$ scored tokens/split). FP16 baseline mean NLL is 2.779 (WT2) and 2.706 (C4); every condition's mean NLL equals $\ln(\text{PPL})$ (e.g., 50\% Wanda 3.239 vs. Mag 4.850; INT4 AWQ 2.865 vs. RTN 2.939; INT3 AWQ 3.272 vs. RTN 3.702). Packed MiB includes uncompressed tensors, 1-bit sparse masks (pruned only) or group-128 scales/zeros, and AWQ channel scales (0.08\,MiB). HS-2k lists raw \texttt{acc} / \texttt{acc\_norm} (\%); HS-512 lists \texttt{acc\_norm} (\%).}
 \label{tab:t1}
 \begin{tabular}{lccccccc}
 \toprule
-Condition & WT2 PPL & C4 PPL & HS-2k & HS-512 & Eff. b/w & Packed MiB & Dec-64 (ms) \\
+Condition & WT2 PPL & C4 PPL & HS-2k (raw/norm) & HS-512 & Eff. b/w & Packed MiB & Dec-64 (ms) \\
 \midrule
-FP16 Baseline & 16.11 & 14.96 & 69.40 & 58.20 & 17.00 & 2944.4 & 1891 \\
+FP16 Baseline & 16.11 & 14.96 & 50.4 / 69.4 & 58.20 & 16.00 & 2944.4 & 1891 \\
 \midrule
 P1 Magnitude 25\% & 21.33 & 17.99 & -- & 58.79 & 13.00 & 2475.8 & 1910 \\
-P1 Magnitude 50\% & 127.80 & 102.46 & 39.90 & 41.41 & 9.00 & 1851.1 & 1914 \\
+P1 Magnitude 50\% & 127.80 & 102.46 & 32.4 / 39.9 & 41.41 & 9.00 & 1851.1 & 1914 \\
 P1 Magnitude 75\% & 1.57M & 1.22M & -- & 28.52 & 5.00 & 1226.3 & 1915 \\
 P2 Wanda 25\% & 16.55 & 15.39 & -- & 59.38 & 13.00 & 2475.8 & 1916 \\
-P2 Wanda 50\% & 25.50 & 21.22 & 58.05 & 53.91 & 9.00 & 1851.1 & 1918 \\
+P2 Wanda 50\% & 25.50 & 21.22 & 42.7 / 58.1 & 53.91 & 9.00 & 1851.1 & 1918 \\
 P2 Wanda 75\% & 63.3k & 51.6k & -- & 29.69 & 5.00 & 1226.3 & 1902 \\
 P2 Wanda 2:4 (50\%) & 67.96 & 51.43 & -- & 44.34 & 9.00 & 1851.1 & 1910 \\
-P3 ShortGPT-BI 50\% & 24.86 & 20.75 & 57.55 & 52.73 & 9.00 & 1851.1 & 1903 \\
+P3 ShortGPT-BI 50\% & 24.86 & 20.75 & 42.0 / 57.6 & 52.73 & 9.00 & 1851.1 & 1903 \\
 P3 ShortGPT-BI 75\% & 428.5 & 268.2 & -- & 32.81 & 5.00 & 1226.3 & 1912 \\
 \midrule
 Q1 RTN INT8 & 16.08 & 14.97 & -- & 58.20 & 8.19 & 1724.2 & 1909 \\
-Q1 RTN INT4 & 18.90 & 16.73 & 67.00 & 57.81 & 4.16 & 1094.6 & 1880 \\
-Q1 RTN INT3 & 40.54 & 30.57 & 56.15 & 50.78 & 3.15 & 937.1 & 1893 \\
+Q1 RTN INT4 & 18.90 & 16.73 & 48.9 / 67.0 & 57.81 & 4.16 & 1094.6 & 1880 \\
+Q1 RTN INT3 & 40.54 & 30.57 & 40.7 / 56.2 & 50.78 & 3.15 & 937.1 & 1893 \\
 Q2 AWQ INT8 & 16.11 & 14.97 & -- & 58.01 & 8.19 & 1724.3 & 1969 \\
-Q2 AWQ INT4 & 17.56 & 15.94 & 68.20 & 58.98 & 4.16 & 1094.6 & 1990 \\
-Q2 AWQ INT3 & 26.38 & 21.29 & 61.10 & 52.54 & 3.15 & 937.2 & 2002 \\
-Q3 Mixed INT4 & 17.54 & 15.92 & 67.80 & 58.40 & 4.16 & 1094.6 & 2020 \\
-Q3 Mixed INT3 & 26.58 & 21.28 & 61.90 & 53.12 & 3.15 & 937.2 & 1939 \\
+Q2 AWQ INT4 & 17.56 & 15.94 & 49.5 / 68.2 & 58.98 & 4.16 & 1094.6 & 1990 \\
+Q2 AWQ INT3 & 26.38 & 21.29 & 44.6 / 61.1 & 52.54 & 3.15 & 937.2 & 2002 \\
+Q3 Mixed INT4 & 17.54 & 15.92 & 49.6 / 67.8 & 58.40 & 4.16 & 1094.6 & 2020 \\
+Q3 Mixed INT3 & 26.58 & 21.28 & 46.0 / 61.9 & 53.12 & 3.15 & 937.2 & 1939 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -108,14 +104,12 @@ For quantization (group size 128, asymmetric min-max with integer zero-point), I
 \end{figure}
 
 \paragraph{Non-uniform pruning (P3) and mixed precision (Q3).}
-For P3, I screened 8 rules on C4 dev at 50\% and 75\% global sparsity (exact weight-count match, $0.10 \le s_\ell \le 0.85$): OWL block and projection \citep{yin2024owl}, ShortGPT Block Influence \citep{men2024shortgpt}, and local/Fisher/Taylor marginal Wanda (Appendix~\ref{app:t1}). Two marginal rules (\texttt{marginal\_local\_wanda} 29.39 dev PPL, \texttt{marginal\_taylor\_wanda} 26.55) actually lost to uniform Wanda (17.07) at 50\% by pushing some projections up to 85\% sparsity. \texttt{shortgpt\_bi\_lam0.15} did well at 50\% (16.84 dev PPL) and beat every rival by a wide margin at 75\% (236.8 vs. 677.9--10,412 dev PPL), so I selected it. As Figure~\ref{fig:t1} shows, it strongly protects block 0 (22.2\% sparsity at 50\% avg; 50.9\% at 75\% avg) and block 27 (45.4\% / 74.1\%). On held-out tests at 50\%, P3 improves WT2 by $-$0.64 [$-$0.76, $-$0.51] and C4 by $-$0.48 [$-$0.69, $-$0.33], while HS-2k \texttt{acc\_norm} is $-$0.50 points [$-$1.25, +0.20] (crosses zero; raw \texttt{acc} $-$0.70 [$-$1.30, $-$0.15]). At 75\%, P3 rescues Wanda from 63,325 down to 428.5 WT2 PPL ($-$62,896 [$-$68,931, $-$57,284]) and raises HS-512 by +3.13 points [$-$1.37, +7.42].
+For P3, I screened 8 rules on C4 dev at 50\% and 75\% sparsity (exact weight-count match, $0.10 \le s_\ell \le 0.85$): OWL \citep{yin2024owl}, ShortGPT Block Influence \citep{men2024shortgpt}, and local/Fisher/Taylor marginal Wanda (Table~\ref{tab:t1dev}). Requiring one rule to stay stable across both budgets selected \texttt{shortgpt\_bi\_lam0.15}: \texttt{marginal\_fisher\_wanda} edged it at 50\% (16.37 vs. 16.84 dev PPL) but collapsed to 3,096 at 75\%, whereas \texttt{shortgpt\_bi\_lam0.15} reached 236.8 (vs. 678--10,412 for rivals). BI spikes at block 0 (0.965) and block 27 (0.246; Figure~\ref{fig:app1}a), giving them 22.2\%/50.9\% and 45.4\%/74.1\% sparsity (Figure~\ref{fig:t1}). On test splits at 50\%, P3 improves WT2 by $-$0.64 [$-$0.76, $-$0.51] and C4 by $-$0.48 [$-$0.69, $-$0.33], with HS-2k \texttt{acc\_norm} at $-$0.50 [$-$1.25, +0.20] (raw \texttt{acc} $-$0.70 [$-$1.30, $-$0.15]). At 75\%, P3 cuts Wanda's collapse from 63,325 to 428.5 WT2 PPL ($-$62,896 [$-$68,931, $-$57,284]), though quality stays poor (32.8\% HS-512, +3.13 [$-$1.37, +7.42]).
 
-For Q3, I ran an integer linear program over $\{2,3,4,8\}$-bit assignments matched to Q2's exact packed bytes (1,147,810,816\,B at INT4, 982,756,864\,B at INT3) across four sensitivity scores on C4 dev (Appendix~\ref{app:t1}). Unweighted MSE did poorly at INT3 (55.48 dev PPL) by sending 44 matrices to 2-bit, whereas \texttt{milp\_taylor} won at both budgets (13.12 INT4; 16.89 INT3). At INT4 it kept 191 matrices at 4-bit, downgraded 2 \texttt{q\_proj} to 3-bit, and upgraded 3 \texttt{v\_proj} (layers 0, 11, 15) to 8-bit. At INT3 it used $\{2{:}3, 3{:}161, 4{:}32\}$, upgrading 25 \texttt{v\_proj}, 4 \texttt{k\_proj}, and 3 \texttt{o\_proj} matrices to 4-bit (Figure~\ref{fig:app1}). On held-out tests, Q3 and Q2 tie on perplexity (INT4 WT2 $-$0.011 [$-$0.059, +0.033]; INT3 +0.205 [$-$0.045, +0.457]), since isolated sensitivity scores miss cross-layer error interactions, though at INT3 Q3 lifts HS-2k raw \texttt{acc} by +1.40 points [+0.50, +2.25] (\texttt{acc\_norm} +0.80 [$-$0.30, +1.95]).
+For Q3, a MILP over $\{2,3,4,8\}$-bit assignments matched Q2's exact bytes (1,147.8\,MB INT4; 982.8\,MB INT3) across four C4-dev scores (Table~\ref{tab:t1dev}). \texttt{milp\_taylor} won both budgets (13.12 INT4; 16.89 INT3; unweighted MSE hit 55.48 at INT3). Because GQA \texttt{v\_proj} and \texttt{k\_proj} have 6$\times$ fewer parameters than MLPs, their Taylor sensitivity per Mparam is highest (6.0 and 3.5; Figure~\ref{fig:app1}b), so Q3 upgrades 3 \texttt{v\_proj} to 8-bit at INT4 and 25 \texttt{v\_proj}, 4 \texttt{k\_proj}, and 3 \texttt{o\_proj} to 4-bit at INT3 ($\{2{:}3, 3{:}161, 4{:}32\}$; Figure~\ref{fig:app1}c). Held-out PPL ties Q2 (INT4 $-$0.011 [$-$0.059, +0.033]; INT3 +0.205 [$-$0.045, +0.457]) because isolated scores miss cross-layer drift, while INT3 Q3 lifts HS-2k raw \texttt{acc} by +1.40 [+0.50, +2.25] (\texttt{acc\_norm} +0.80 [$-$0.30, +1.95]).
 
-\paragraph{Calibration drift, systems gap, and examples.}
-Final-block cumulative calibration $L_2$ error tracks held-out WT2/C4 NLL closely across all 17 compressed models (Spearman $\rho=0.971$; Figure~\ref{fig:app1}; vs. HS-512 $r=-0.931$). One quirk: my isolated per-projection probe reported $\infty$ on AWQ layers 1--2 \texttt{down\_proj} because AWQ folds $s^{-1}$ into \texttt{up\_proj} and $s$ into \texttt{down\_proj}, so testing \texttt{down\_proj} alone on unrescaled inputs breaks cancellation; end-to-end block drift cancels cleanly (0.142 AWQ-4 vs. 0.234 RTN-4).
-
-On runtime, packing cuts storage by 1.59$\times$ (50\% pruning) to 3.14$\times$ (INT3), taking ~0.4\,s for pruning (1.4\,s for 2:4), 0.7--2.7\,s for RTN, and 162--186\,s for AWQ/Q3 scale search. Yet dense FP16 execution leaves VRAM flat at 4,155--4,156\,MiB, prefill at 45--48\,ms (512) and 177--186\,ms (2,048), and makes AWQ/Q3 decode 48--129\,ms slower (1,939--2,020 vs. 1,891\,ms) due to the \texttt{o\_proj} pre-hook. On fixed HellaSwag examples (Appendix~\ref{app:qual}), Wanda, P3, and Q3-INT3 recover row 112 (\emph{Playing polo}) where Magnitude-50\% and AWQ-INT3 fail, while 50\% pruning flips a baseline error to right on row 86 (\emph{Removing ice from car}).
+\paragraph{Component sensitivity, calibration drift, and systems gap.}
+Per-projection probes show why activation-aware scoring matters: under 50\% magnitude pruning, \texttt{o\_proj} (relative $L_2$ 0.293), \texttt{up\_proj} (0.289), \texttt{v\_proj} (0.249), and \texttt{down\_proj} (0.234) suffer ~2$\times$ the error of \texttt{q\_proj} (0.141) and \texttt{k\_proj} (0.130), matching 4-bit RTN (0.099--0.121 vs. 0.052--0.054). Wanda cuts every projection's error by 25--47\% (\texttt{o\_proj} 0.185, \texttt{v\_proj} 0.160, \texttt{q\_proj} 0.075). Final-block cumulative $L_2$ drift tracks held-out WT2 NLL overall ($\rho=0.971$; Figure~\ref{fig:app1}d) and within each family (pruning $\rho=0.933$; quantization $\rho=0.976$; vs. HS-512 $r=-0.931$), though severity spread drives much of that ordering and tight dev wins (Q3 vs. Q2) did not transfer to held-out PPL. Isolated AWQ probes reported $\infty$ on layers 1--2 \texttt{down\_proj} due to folded $s/s^{-1}$ scales, which cancel end-to-end (0.142 AWQ-4 vs. 0.234 RTN-4). Packing cuts storage 1.59--3.14$\times$ (0.4\,s pruning, 0.7--2.7\,s RTN, 162--186\,s AWQ/Q3 search), yet dense FP16 execution leaves VRAM at 4,155--4,156\,MiB, prefill at 45--48\,ms (512) / 177--186\,ms (2,048), and slows AWQ/Q3 decode by 48--129\,ms via the \texttt{o\_proj} hook. Qualitative HellaSwag flips appear in Appendix~\ref{app:qual}.
 
 \section{Task 2: Attention and Context Memory}
 
@@ -151,10 +145,10 @@ $L$ & Operator & Out err & Fwd+Bwd (ms) & Mem (MiB) & Out err & Fwd+Bwd (ms) & M
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:t2a} and Figure~\ref{fig:t2} (left) separate tiling from fusion. Forward-only memory at $L=8192$ FP16 is 264.6\,MiB for Python tiling, nearly matching SDPA (256.5\,MiB) and far below dense (11,553\,MiB). In forward+backward, however, PyTorch autograd caches per-tile tensors (4,577\,MiB), while Flash SDPA recomputes on the fly (344.8\,MiB, 42.8$\times$ less than dense). Because Python tiling launches $O((L/64)^2)$ tiny kernels, it takes 14,289\,ms (4,055\,ms forward) vs. 611.9\,ms for dense (246.9\,ms forward) and 4.19\,ms for Flash SDPA (1.06\,ms forward, 146$\times$ faster than dense). Gradient errors stay small everywhere.
+Table~\ref{tab:t2a} and Figure~\ref{fig:t2} (left) separate tiling from fusion. Forward-only memory at $L=8192$ FP16 is 264.6\,MiB for Python tiling vs. 256.5\,MiB SDPA and 11,553\,MiB dense. Dense FP16 and FP32 peak memory nearly match (14,753 vs. 14,769\,MiB) because reference dense attention upcasts logits and softmax to FP32 internally. In fwd+bwd, autograd caches per-tile tensors (4,577\,MiB alloc / 4,988\,MiB res), whereas Flash SDPA recomputes on the fly (344.8\,MiB alloc, 42.8$\times$ below dense; 714 vs. 17,098\,MiB res). Launching $O((L/64)^2)$ tiny kernels slows Python tiling to 14,289\,ms (4,055\,ms fwd) vs. 611.9\,ms dense (246.9\,ms fwd) and 4.19\,ms Flash SDPA (1.06\,ms fwd, 233$\times$ faster fwd / 146$\times$ fwd+bwd). Max $dQ/dK/dV$ gradient errors stay $\le 2.3\times 10^{-5}$ (FP32 tiled), $\le 2.6\times 10^{-5}$ (FP32 SDPA), and $2.2$--$3.7\times 10^{-3}$ (FP16; full breakdown in Table~\ref{tab:t2a_app}).
 
 \subsection{Part B: Multi-Query Associative Recall (MQAR)}
-Following Zoology \citep{arora2024zoology}, I trained 2-layer causal Transformers ($T=256, d=128, H=4, d_h=32$) for 4,500 updates across 3 seeds (6304--6306, 42 runs). Every attention operator uses the exact same 436,736 parameters: dense, sliding window $W=64$, ELU+1 linear attention \citep{katharopoulos2020transformers}, mixed local+dilated \citep{beltagy2020longformer} (two local heads, two dilated heads at offsets $0,4,\dots,252$), and my B3 intervention, content-based top-$k$ ($k=64$). Before running B3, I predicted that keeping the exact 64-position attended budget of sliding window but choosing positions by score instead of distance would solve far recall completely with zero extra parameters.
+Following Zoology \citep{arora2024zoology}, I trained 2-layer causal Transformers ($T=256, d=128, H=4, d_h=32$) for 4,500 updates across 3 seeds (6304--6306, 42 runs). Every attention operator uses the exact same 436,736 parameters: dense (131,584 causal pairs/layer at $T=256$), sliding window $W=64$ (57,472 pairs), ELU+1 linear attention \citep{katharopoulos2020transformers} (0 explicit pairs, 16.5\,KB/layer state vs. 256\,KB dense KV), mixed local+dilated \citep{beltagy2020longformer} (two local heads, two dilated heads at offsets $0,4,\dots,252$; 45,376 pairs), and my B3 intervention, content-based top-$k$ ($k=64$, chosen specifically to match $W=64$'s 57,472 attended pairs/layer while still computing all 131,584 raw scores and keeping the full KV cache). Before running B3, I predicted that selecting 64 positions by score instead of distance would solve far recall completely with zero extra parameters.
 
 \begin{figure}[t]
 \centering
@@ -165,11 +159,11 @@ Following Zoology \citep{arora2024zoology}, I trained 2-layer causal Transformer
 
 \begin{table}[t]
 \centering\footnotesize
-\caption{Task 2 Part B MQAR test recall (\%, mean $\pm$ std over 3 seeds; 436,736 params each). Chance is $1/64=1.56\%$ (vocab) or $1/K$ (in-sequence values). W64 ctrl imposes $W=64$ at test time on the dense model.}
+\caption{Task 2 Part B MQAR test recall (\%, mean $\pm$ std over 3 seeds; 436,736 params each). Near, Far, and Mixed are evaluated at the model's training load $K$; All-$K$ $[128,256)$ pools all test loads $K\in\{4,8,16\}$ (showing cross-load drop for $K=4,8$). Chance is $1/64=1.56\%$ (vocab) or $1/K$ (in-sequence). W64 ctrl imposes $W=64$ at test time on the dense model.}
 \label{tab:t2b}
 \begin{tabular}{llccccc}
 \toprule
-Mechanism & Train ($K$, reg.) & Near & Far & Mixed & $[128,256)$ & W64 ctrl (N / F) \\
+Mechanism & Train ($K$, reg.) & Near & Far & Mixed & All-$K$ $[128,256)$ & W64 ctrl (N / F) \\
 \midrule
 Dense (B1) & $K=4$, mixed & 100.0 $\pm$ 0.0 & 100.0 $\pm$ 0.0 & 100.0 $\pm$ 0.0 & 52.4 & 100.0 / 1.5 \\
 Dense (B1) & $K=8$, mixed & 100.0 $\pm$ 0.0 & 100.0 $\pm$ 0.0 & 100.0 $\pm$ 0.0 & 73.3 & 100.0 / 1.6 \\
@@ -191,7 +185,7 @@ Top-$k$=64 (B3) & $K=16$, mixed & 100.0 $\pm$ 0.0 & 100.0 $\pm$ 0.0 & 100.0 $\pm
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:t2b}, Figure~\ref{fig:t2} (right), and the full distance-by-load heatmap in Figure~\ref{fig:app2b} support that prediction. Dense attention solves every load (~100\%), generalizes from near-only $K=16$ training to 99.7\% far recall, and drops to 1.5--1.6\% ($1/64$ chance) under a test-time $W=64$ mask. Near-trained sliding window gets 100\% near and 1.6\% far (an exact architectural cliff beyond $2(W-1)=126$), while mixed-trained sliding window fails even on near recall (7.0\%) because unreachable far queries corrupt gradients. Local+dilated hits only 31.0\% at $K=4$ and 6.6\% at $K=16$ (near $1/K=6.25\%$ guessing) since stride-4 offsets miss arbitrary key slots. Linear ELU+1 (16.5\,KB/layer state vs. 256\,KB dense KV at $T=256$) reaches 99.2\% at $K=4$, but stalls on 1/3 seeds at higher load: seeds end at 99.4\%, 12.9\%, and 99.4\% ($K=8$) and 96.0\%, 99.3\%, and 7.8\% ($K=16$; Figure~\ref{fig:app2}). B3 top-$k$=64 solves $K=16$ with 100.0\% near, far, and mixed recall across all three seeds (reaching 100\% by update 1,500). Still, the inference sweep ($T=256\dots 8192$, Figure~\ref{fig:app2}) shows the systems catch: because masked sliding, local+dilated, and top-$k$ still compute $T{\times}T$ score matrices in PyTorch, only linear attention lowers peak memory (600\,MiB vs. 4,297\,MiB dense and 5,288\,MiB top-$k$ at $T=8192$) and latency (160.8 vs. 194.7\,ms; top-$k$ takes 395.6\,ms).
+Table~\ref{tab:t2b}, Figure~\ref{fig:t2} (right), and the full distance-by-load heatmap in Figure~\ref{fig:app2b} support that prediction. Dense attention solves its trained load (~100\%, though $K=4$ and $K=8$ models drop to 52.4\% and 73.3\% when evaluated across higher $K$ in the pooled $[128,256)$ column), generalizes from near-only $K=16$ training to 99.7\% far recall, and drops to 1.5--1.6\% ($1/64$ chance) under a test-time $W=64$ mask. Near-trained sliding window gets 100\% near and 1.6\% far (an exact architectural cliff beyond $2(W-1)=126$), while mixed-trained sliding window fails even on near recall (7.0\%), likely because unreachable far queries add noisy gradients (though I did not run a loss-masking control to isolate this). Local+dilated hits only 31.0\% at $K=4$ and 6.6\% at $K=16$ (near $1/K=6.25\%$ guessing) since stride-4 offsets miss arbitrary key slots. Linear ELU+1 reaches 99.2\% at $K=4$, but stalls on 1/3 seeds at higher load: seeds end at 99.4\%, 12.9\%, and 99.4\% ($K=8$) and 96.0\%, 99.3\%, and 7.8\% ($K=16$; Figure~\ref{fig:app2}a). B3 top-$k$=64 solves $K=16$ with 100.0\% near, far, and mixed recall across all three seeds (reaching 100\% by update 1,500). Still, the inference sweep ($T=256\dots 8192$, Figure~\ref{fig:app2}b) shows the systems catch: because masked sliding, local+dilated, and top-$k$ still compute $T{\times}T$ score matrices and hold full KV tensors in PyTorch, only linear attention lowers peak memory (600\,MiB vs. 4,297\,MiB dense and 5,288\,MiB top-$k$ at $T=8192$) and latency (160.8 vs. 194.7\,ms; top-$k$ takes 395.6\,ms).
 
 \subsection{Part C: KV-Cache Compression on \texttt{Qwen2.5-1.5B-Instruct}}
 I evaluated six KV policies on the 180 frozen retrieval prompts (greedy decoding, 5-digit codes; 2 lengths $\times$ 3 positions $\times$ 3 distractors $\times$ 10 cases). After chat-templating, nominal 2,048 prompts average 2,626.7 context tokens (2,604--2,648) plus 34.7 query tokens, and nominal 4,096 prompts average 5,215.9 (5,192--5,242) plus 34.7, with 26--27 evidence tokens. C1 split-prefill equivalence passed on all 18 stratified prompts (finite, 18/18 top-1 match, max logit diff 0.09--0.25, mean 0.007--0.009). All five compressed policies match the exact serialized byte budget $M_4(L)$ of INT4 KIVI (~28.7\% of FP16 context KV, group size 64, trailing $L \bmod 64$ tokens in FP16, plus a separate ~1.14\,MB decode buffer). Eviction and hybrid policies keep 8 sink and 64 recent tokens, with question-aware scores computed globally across heads/layers while keeping SDPA active.
@@ -214,30 +208,30 @@ Policy & Exact (\%) & Ans. NLL & KL vs. FP16 & Evid. ret. & Packed MiB & Comp. (
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:t2c} and Figure~\ref{fig:app2} (right) show sharp differences. \texttt{evict\_sink\_recent} \citep{xiao2024streamingllm} gets 100\% on \texttt{end} evidence (60/60) and 0\% on \texttt{start}/\texttt{middle} (0/120; 33.3\% overall). Question-aware eviction \citep{zhang2023h2o,li2024snapkv} lifts evidence retention to 93.5\% and accuracy to 98.9\% (178/180; +65.6 points [+58.9, +72.2]), missing only 2 middle/8-distractor prompts. The biggest surprise was \texttt{quant\_int4\_tok}, which collapsed to 0.0\% (0/180, KL 5.67) and output repetitive gibberish (\texttt{airport river river...}). Qwen2.5's \texttt{k\_proj} biases create strong channel-wise key outliers, so per-token min-max scaling wipes out non-outlier channels. Transposing keys to per-channel grouping (\texttt{quant\_int4\_kivi}; \citealp{liu2024kivi}) restored 100.0\% (180/180; +100.0 points, NLL 0.0016 vs. 0.0010, $\Delta=+0.0006$ [+0.0004, +0.0009]). \texttt{hybrid\_fp16\_int2} stayed strictly under budget (29.64\,MiB, 27.5\% of FP16) and hit 99.4\% (179/180; +0.56 [$-$1.11, +2.78] vs. question-aware), missing only one middle/8-distractor prompt (Appendix~\ref{app:qual}).
+Table~\ref{tab:t2c}, Figure~\ref{fig:app2}c--d, and Table~\ref{tab:t2c_bk} show sharp differences (noting \texttt{full\_fp16} hits a 100\% ceiling on this locked task). \texttt{evict\_sink\_recent} \citep{xiao2024streamingllm} gets 100\% on \texttt{end} (60/60) and 0\% on \texttt{start}/\texttt{middle} (33.3\% across all lengths and distractor counts). Question-aware eviction \citep{zhang2023h2o,li2024snapkv} reaches 98.9\% (178/180; +65.6 [+58.9, +72.8] vs. sink+recent), staying flat at 98.9\% across lengths 2,048 and 4,096 and missing only 2 prompts at 8 distractors (96.7\% vs. 100\% at 0/2). The biggest surprise was \texttt{quant\_int4\_tok}, collapsing to 0.0\% in every cell (KL 5.67, outputting \texttt{airport river...}). Consistent with \citet{liu2024kivi}, channel-wise key outliers (likely amplified by Qwen2.5's \texttt{k\_proj} biases; separate K/V MSE was not logged directly) break per-token scaling. Per-channel key grouping (\texttt{quant\_int4\_kivi}) restored 100.0\% everywhere (+100.0 vs. per-token, NLL $-$4.43 [$-$4.55, $-$4.30]; +66.7 [+60.0, +73.3] vs. sink+recent). \texttt{hybrid\_fp16\_int2} kept 14.0\% of context tokens in FP16 (capturing 72.9\% of evidence in FP16 on sampled masks) and quantized 86.0\% to INT2-KIVI, staying under budget (29.64\,MiB, 27.5\% FP16) at 99.4\% (179/180; +0.56 [$-$1.11, +2.78] vs. question-aware; 98.9\%/100.0\% across lengths; sole error at middle/8 distractors, Appendix~\ref{app:qual}).
 
-In the C5 packed benchmark (Table~\ref{tab:c5}), serialized bytes matched the formulas exactly: at $B=8, L=4096$, KV storage drops from 939.5\,MB (FP16) to 264.2\,MB (INT4-KIVI, 3.56$\times$) and 146.8\,MB (INT2-KIVI, 6.40$\times$). Yet unpacking in PyTorch before SDPA adds 10.1--53.5\,ms per step: at $B=1, L=2048$, decode slows from 2.16 to 13.33\,ms (6.17$\times$) and peak VRAM doubles (156.1 vs. 77.7\,MB); at $B=8, L=4096$, decode slows from 49.68 to 104.02\,ms (2.09$\times$). Post-prefill eviction also cannot lower prefill VRAM (5.01\,GB during scoring vs. 4.36\,GB FP16).
+In C5 (Table~\ref{tab:c5}), serialized bytes matched theory exactly: at $B=8, L=4096$, KV drops from 939.5\,MB (FP16) to 264.2\,MB (INT4-KIVI, 3.56$\times$) and 146.8\,MB (INT2-KIVI, 6.40$\times$). Yet PyTorch unpacking adds 10.1--53.5\,ms/step: at $B=1, L=2048$, decode slows from 2.16 to 13.33\,ms (6.17$\times$) and VRAM doubles (156.1 vs. 77.7\,MB); at $B=8, L=4096$, decode slows 2.09$\times$ (104.02 vs. 49.68\,ms). Post-prefill eviction also cannot cut prefill VRAM (5.01 vs. 4.36\,GB).
 
 \section{Task 3: Policy Distillation and Speculative Decoding}
 
 \paragraph{Validation and distillation.}
-I paired \texttt{Qwen2.5-1.5B-Instruct} (target) with \texttt{Qwen2.5-0.5B-Instruct} (draft; identical tokenizer and chat template). Step 1 exactness checks \citep{leviathan2023speculative,chen2023accelerating} all passed: on 100,000 length-3 draws from the 3-symbol Markov chain ($\gamma=2$, 27 sequences, min expected count 900), my sampler gave $\chi^2=23.34$ ($p=0.6135 \ge 0.01$), while the broken negative control ($r=p$) failed ($\chi^2=13{,}306.4, p=0.00$). Self-speculative acceptance was 1.000, and real-model KV rollback kept exact lengths (max FP16 logit diff 0.0337).
+I paired \texttt{Qwen2.5-1.5B-Instruct} (target) with \texttt{Qwen2.5-0.5B-Instruct} (draft; identical tokenizer/chat template). All Step 1 exactness checks \citep{leviathan2023speculative,chen2023accelerating} passed: on 100,000 length-3 draws from the 3-symbol Markov chain ($\gamma=2$, 27 sequences, min expected count 900, 54,992 bonus tokens), my sampler gave $\chi^2=23.34$ ($p=0.6135 \ge 0.01$), while the broken control ($r=p$) failed ($\chi^2=13{,}306.4, p=0.00$). Self-speculative acceptance was 1.000 across $\gamma\in\{1,2,4\}$, KV rollback kept exact lengths (max FP16 logit diff 0.0337; $<10^{-4}$ FP32 unit test), and unit tests verified exact EOS stopping without post-EOS leakage.
 
-I distilled LoRA adapters \citep{hu2022lora} ($r=8, \alpha=16$, dropout 0, on \texttt{q/k/v/o}; 1,081,344 trainable params = 0.22\% of 495.1M) with AdamW ($\text{lr}=3\times 10^{-4}$, weight decay 0.01) and forward KL over 40,000 teacher-scored tokens (30k GSM8K \citealp{cobbe2021gsm8k} + 10k short extraction, temperature 1.0, top-$p$ 1.0) on seeds 6304 and 6305. Because \texttt{transformers==4.57.1} rejects \texttt{generator=} in \texttt{model.generate()}, I used \texttt{torch.random.fork\_rng} (\texttt{generate\_prefix\_banks\_compat.py}) to reproduce exact prompt order, seeds, and positions (Appendix~\ref{app:setup}). With equal 40k tokens (~112--115 updates, 0--3 skipped steps, ~6.1\,GB peak VRAM), off-policy distillation took 417.4\,s and 416.2\,s (279.4\,s teacher pool + 30--32\,s scoring + 106\,s student training), while on-policy \citep{zhou2024distillspec,agarwal2024gkd} took 1,938.1\,s and 1,946.4\,s (4.66$\times$ slower) because live batch-1 student rollouts alone took 1,806--1,814\,s (93\% of time). Merging LoRA took 3.4--8.4\,s (mean logit diff 0.0073--0.0079) and removed a 47.2\% unmerged draft overhead (2,581 vs. 1,753\,ms on 24 prompts). Figure~\ref{fig:app3} shows on-policy training KL staying higher on student rollouts, and off-policy KL jumping at 30k tokens when short-form prompts begin.
+I distilled LoRA adapters \citep{hu2022lora} ($r=8, \alpha=16$, dropout 0, on \texttt{q/k/v/o}; 1,081,344 params = 0.22\% of 495.1M) with AdamW ($\text{lr}=3\times 10^{-4}$, wd 0.01) and forward KL over 40,000 teacher-scored tokens (30k GSM8K \citealp{cobbe2021gsm8k} + 10k short extraction, $T=1.0, \text{top-}p=1.0$, seeds 6304/6305; prefix banks generated via \texttt{fork\_rng} for \texttt{transformers==4.57.1}, Appendix~\ref{app:setup}). Stepping after full rollouts once accumulated tokens reach $\ge 256$ (mean math ~187 tokens $\Rightarrow$ ~375 tokens/step, plus 0--3 FP16 overflow skips) gave 112--115 updates (~6.1\,GB VRAM). Off-policy took 417.4\,s / 416.2\,s (279.4\,s pool + 30--32\,s scoring + 106\,s training), while on-policy \citep{zhou2024distillspec,agarwal2024gkd} took 1,938.1\,s / 1,946.4\,s (4.66$\times$ slower; 93\% in batch-1 rollouts). Merging LoRA took 3.4--8.4\,s (mean logit diff 0.0073--0.0079) and removed 47.2\% wrapper overhead (2,581 vs. 1,753\,ms). Figure~\ref{fig:app3} plots the KL curves (showing the 30k-token short-form jump).
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{fig3_task3.pdf}
-\caption{Task 3 alignment and timing. Left: common-prefix Forward KL on the teacher bank by workload. Right: mean per-prompt decode time split into draft proposal, target verify, and accept/cache against target-only (dashed line).}
+\caption{Task 3 alignment and timing. Left: common-prefix Forward KL on the teacher bank by workload. Right: mean per-prompt decode time split into all four separate round-time components (draft proposal, target verify, accept/residual, cache update) against target-only (dashed line).}
 \label{fig:t3}
 \end{figure}
 
 \paragraph{Prefix alignment.}
-On the common \texttt{teacher} bank (3,875 positions; full bank comparison in Table~\ref{tab:t3align}), distillation cuts overall Forward KL from 0.234 (\texttt{original}) to 0.196--0.200 (off-policy) and 0.202 (on-policy), lifting expected acceptance $1-\text{TV}$ from 85.2\% to 85.7--85.8\% (off-policy) and 85.0\% (on-policy). Figure~\ref{fig:t3} (left) shows gains concentrate in \texttt{short\_familiar} (KL 0.400 to 0.267--0.284; $E[\text{acc}]$ +3.3 to +4.0 points) and early positions $[1,16]$ (0.224 to 0.161--0.173), while \texttt{math} starts tightly aligned (0.180 to 0.162--0.167). On the \texttt{original\_draft} bank (3,876 positions), on-policy edges out off-policy on Forward KL (0.230--0.234 vs. 0.237--0.242; original 0.289), though off-policy stays slightly ahead on expected acceptance (83.6\% vs. 83.3\%). On own-rollout banks, KL is higher on on-policy rollouts (~0.31--0.33) than off-policy (~0.25--0.29). The \texttt{exact\_spec\_original\_gamma4} bank (3,535 positions) mirrors \texttt{teacher}-bank rankings ($E[\text{acc}]$ 87.9\% to 88.1--88.3\% off-policy), and live target-only vs. speculative runs match in EOS rate (45.4\% vs. 45.8\% at $\gamma=2$) and mean length (40.1 vs. 40.7 tokens).
+On the \texttt{teacher} bank (3,875 positions; full per-seed 7-bank breakdown in Table~\ref{tab:t3align}), distillation cuts Forward KL from 0.234 (\texttt{original}) to 0.196--0.200 (off-policy) and 0.202 (on-policy), lifting greedy agreement from 86.0\% to 86.9--87.3\% and 86.6--87.0\%. Expected acceptance $1-\text{TV}$ rises from 85.2\% to 85.7--85.8\% for off-policy, whereas on-policy dips slightly to 85.0\% (higher reverse KL: 0.280--0.285 vs. 0.263). Gains concentrate in \texttt{short\_familiar} (KL 0.400 to 0.267--0.284; Figure~\ref{fig:t3}) and early positions $[1,16]$ (KL 0.224 to 0.161--0.173); late positions $[65,192]$ shift modestly on \texttt{teacher} (KL 0.220 to 0.197--0.206) and more on \texttt{original\_draft} (KL 0.318 to 0.257--0.264). On \texttt{original\_draft} overall (3,876 positions), on-policy edges off-policy on Forward KL (0.230--0.234 vs. 0.237--0.242; original 0.289) while off-policy leads on $E[\text{acc}]$ (83.6--83.7\% vs. 83.2--83.3\%). Across frozen own-rollout banks, KL is higher on on-policy rollouts (0.312--0.329) than off-policy (0.249--0.294). The \texttt{exact\_spec\_original\_gamma4} bank (3,535 positions) mirrors \texttt{teacher} rankings ($E[\text{acc}]$ 87.9\% to 88.1--88.3\%), and live target-only vs. speculative runs match in EOS rate (45.4\% vs. 45.8\%) and length (40.1 vs. 40.7 tokens).
 
 \begin{table}[t]
 \centering\footnotesize
-\caption{Task 3 live speculative decoding (120 prompts $\times$ 2 reps = 240 evals/row, max 64 tokens). Target-only averages 33.3\,tok/s. Break-even $\alpha^*$ is 93.6\% ($\gamma=2$) and 94.1\% ($\gamma=4$); since speculative is slower, amortization break-even does not exist.}
+\caption{Task 3 live speculative decoding (120 prompts $\times$ 2 reps = 240 evals/row, max 64 tokens; pooled token-weighted Acc/Ex and Acc/Pr). Target-only averages 33.3\,tok/s. Break-even $\alpha^*$ is 93.6\% ($\gamma=2$) and 94.1\% ($\gamma=4$); since speculative is slower, amortization break-even does not exist.}
 \label{tab:t3spec}
 \begin{tabular}{lccccccc}
 \toprule
@@ -259,9 +253,9 @@ Draft & $\gamma$ & Acc/Ex (\%) & Acc/Pr (\%) & $\bar{L}_{\text{pref}}$ & Tgt/tok
 \end{table}
 
 \paragraph{Live speculative decoding, cost model, and standalone accuracy.}
-In live decoding (Table~\ref{tab:t3spec}, peak VRAM ~7.6\,GB), off-policy distillation raises $\gamma=2$ acceptance significantly over \texttt{original} (+1.98 points [+0.21, +3.85] for \texttt{s6304}; +2.75 [+1.02, +4.65] for \texttt{s6305}), cutting target passes/token from 1.00 to 0.39 ($\gamma=2$) and 0.27 ($\gamma=4$). On-policy gains +1.49--1.51 points at $\gamma=2$ (CIs cross zero) and trails off-policy by $-$1.15 to $-$1.40 points at $\gamma=4$ [$-$2.77, $-$0.11].
+In live decoding (Table~\ref{tab:t3spec}, peak VRAM ~7.6\,GB), speculative decoding already cuts target passes/token from 1.00 to 0.394 ($\gamma=2$) and 0.276 ($\gamma=4$) with \texttt{original}, and off-policy distillation trims that slightly further to 0.387--0.389 and 0.270--0.274. Pooled token-weighted Acc/Ex at $\gamma=2$ rises by +1.53 and +1.78 points over \texttt{original} (+1.13 to +1.15 on-policy); on paired per-prompt macro Acc/Ex (Table~\ref{tab:t3ci}), off-policy gains +1.98 points [+0.21, +3.85] (\texttt{s6304}) and +2.75 [+1.02, +4.65] (\texttt{s6305}), while on-policy gains +1.49--1.51 (CIs cross zero) and trails off-policy at $\gamma=4$ by $-$1.40 [$-$2.77, $-$0.11] and $-$1.15 [$-$2.10, $-$0.22]. Workload splits (Table~\ref{tab:t3sub}) also reveal clear negative transfer on \texttt{short\_shifted}: at $\gamma=2$, distillation lifts \texttt{short\_familiar} acceptance from 78.6\% to 86.0--87.4\% and \texttt{math} from 87.6\% to 88.3--88.8\% (off-policy), but drops \texttt{short\_shifted} acceptance from 83.4\% to 78.2--79.6\% across all four distilled drafts.
 
-Yet every speculative run is slower than target-only (26.8--27.1 vs. 33.3\,tok/s). Isolated step timings explain why: on the L4 at lengths 64--256, one 0.5B draft step takes 26.7--27.3\,ms vs. 32.1--32.7\,ms for 1.5B, giving $c=t_{\text{draft}}/t_{\text{target}}=0.816$--$0.835$. At batch 1 in eager PyTorch, 24 layers vs. 28 layers is kernel-launch bound rather than compute bound. With $v_\gamma=1.18$--$1.20$, $\hat{S}_\gamma(\alpha)=\frac{1-\alpha^{\gamma+1}}{(1-\alpha)(\gamma c+v_\gamma)}$ puts break-even at $\alpha^*=93.6\%$ ($\gamma=2$) and $94.1\%$ ($\gamma=4$), predicting $\hat{S}_\gamma\in[0.86, 0.94]$ (Figure~\ref{fig:app3}). The extra ~0.10 drop to measured $S_{\text{dec}}$ comes from dual prefill, accept/residual (9--10\,ms), cache updates (2.6--2.9\,ms), and early EOS on short prompts (math gets $S=0.83$--$0.84$, \texttt{short\_shifted} 0.64--0.70, and fixed-64 \texttt{diag24} 0.84--0.85; Table~\ref{tab:t3sub}). Because every prompt loses 0.24--0.39\,s, upfront training (420--1,950\,s) cannot amortize here; with $c=0.25$ (e.g., CUDA graphs or a 7B target), $\alpha^*$ drops to 48\% and 87.5\% acceptance would give $\hat{S}_4=1.84\times$.
+Yet every speculative run is slower than target-only (26.8--27.1 vs. 33.3\,tok/s), and paired throughput CIs vs. \texttt{original} cross zero at $\gamma=2$ (+0.20 [$-$0.17, +0.54] and +0.30 [$-$0.09, +0.67]\,tok/s off-policy; Table~\ref{tab:t3ci}), with only \texttt{offpolicy\_s6305} reaching a small positive CI at $\gamma=4$ (+0.48 [+0.02, +1.00]\,tok/s; +0.52 [+0.12, +0.93] over \texttt{onpolicy\_s6305}). Isolated step timings explain the slowdown: on the L4 at lengths 64--256, one 0.5B draft step takes 26.7--27.3\,ms vs. 32.1--32.7\,ms for 1.5B, giving $c=t_{\text{draft}}/t_{\text{target}}=0.816$--$0.835$. At batch 1 in eager PyTorch, 24 vs. 28 layers is kernel-launch bound rather than compute bound. With $v_\gamma=1.18$--$1.20$, $\hat{S}_\gamma(\alpha)=\frac{1-\alpha^{\gamma+1}}{(1-\alpha)(\gamma c+v_\gamma)}$ puts break-even at $\alpha^*=93.6\%$ ($\gamma=2$) and $94.1\%$ ($\gamma=4$), predicting $\hat{S}_\gamma\in[0.86, 0.94]$ (Figure~\ref{fig:app3}). The extra ~0.10 drop to measured $S_{\text{dec}}$ comes from dual prefill, accept/residual (9--10\,ms), cache updates (2.6--2.9\,ms), and early EOS on short prompts (at $\gamma=2$, \texttt{math} gets $S_{\text{tot}}=0.83$--$0.84$, \texttt{short\_shifted} 0.64--0.72, and fixed-64 \texttt{diag24} 0.83--0.85; Table~\ref{tab:t3sub}). Because every prompt loses 0.24--0.39\,s, upfront training (420--1,950\,s) cannot amortize here; with $c=0.25$ and $v_4=1.19$ (e.g., CUDA graphs or a 7B target), break-even drops to $\alpha^*=57.1\%$ ($\gamma=2$: 46.4\%) and 87.5\% acceptance gives $\hat{S}_4=1.78\times$.
 
 \begin{table}[t]
 \centering\footnotesize
@@ -283,7 +277,7 @@ Original 0.5B & 48.3 & 5.0 & 33.3 & 33.3 & 76.7 & 76.7 \\
 \end{tabular}
 \end{table}
 
-Standalone greedy checks (Table~\ref{tab:t3acc}) show a clear trade-off: KL-only distillation lowers standalone GSM8K accuracy from 48.3\% (\texttt{original}) to 35.0--36.7\% for off-policy, while on-policy preserves 41.7\% on both seeds (+5.0 to +6.7 points over off-policy; Appendix~\ref{app:qual}). On \texttt{short\_familiar}, every model including the 1.5B target gets 33.3\%, capped entirely by verbose format failures. On \texttt{short\_shifted}, three distilled runs jump to 83.3--93.3\%, while \texttt{onpolicy\_s6304} drops to 33.3\% due to verbose drift.
+Standalone greedy checks (Table~\ref{tab:t3acc}) are small-sample diagnostics ($n=60$ GSM8K, where 5 points is 3 problems; $n=30$ per short split), so differences should be read cautiously. Still, KL-only distillation consistently lowered standalone GSM8K accuracy from 48.3\% (\texttt{original}) to 35.0--36.7\% for off-policy, while both on-policy seeds stayed at 41.7\% (Appendix~\ref{app:qual}). On \texttt{short\_familiar}, every model including the 1.5B target gets 33.3\%, capped entirely by verbose format failures; on \texttt{short\_shifted}, three distilled runs jump to 83.3--93.3\%, while \texttt{onpolicy\_s6304} drops to 33.3\% due to verbose drift.
 
 \section{Conclusion and Limitations}
 Two main lessons came out of these experiments. First, activation and key-channel geometry drive whether compression works: ignoring activation norms, using fixed local windows on long-range recall, or quantizing Qwen2.5 keys per token instead of per channel leads to steep drops or 0\% collapse. Second, theoretical reductions do not turn into GPU speedups by themselves in eager PyTorch: dense FP16 execution of compressed weights, pure-Python tiled attention, dense-masked top-$k$, pure-PyTorch KV unpacking, and a 24-layer eager draft ($c=0.83$) all erased theoretical gains. Limitations include single-GPU L4 measurements, one calibration set in Task 1, synthetic MQAR and KV-retrieval suites in Task 2, and a single 0.5B/1.5B pair with a 40k-token budget in Task 3.
@@ -309,7 +303,7 @@ Three small compatibility fixes were needed: (1) in \texttt{transformers==4.57.1
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig4_app_task1.pdf}
-\caption{Task 1 supplementary plots. Left: Q3-INT3 bit allocation across all 7 projections and 28 layers. Right: final-block cumulative calibration $L_2$ error vs. held-out WikiText-2 NLL ($\rho=0.971$).}
+\caption{Task 1 sensitivity and drift diagnostics. (a) P3 ShortGPT Block Influence sensitivity across the 28 blocks. (b) Q3 mean first-order Taylor sensitivity per million parameters by projection type (explaining why GQA \texttt{v\_proj} and \texttt{k\_proj} are upgraded). (c) Q3-INT3 bit allocation across all 7 projections and 28 layers. (d) Final-block cumulative calibration $L_2$ error vs. held-out WikiText-2 NLL (overall $\rho=0.971$; pruning $\rho=0.933$; quantization $\rho=0.976$).}
 \label{fig:app1}
 \end{figure}
 
@@ -363,10 +357,39 @@ Q3 $-$ Q2 AWQ (INT3) & +0.205 [$-$0.045, +0.457] & $-$0.010 [$-$0.170, +0.140] &
 \section{Task 2 and Task 3 Additional Diagnostics}
 \label{app:t2}
 
+\begin{table}[H]
+\centering\footnotesize
+\caption{Task 2 Part A forward latency (\texttt{fwd}), max gradient error ($\max(|dQ|,|dK|,|dV|)$ vs. FP32 dense), and forward+backward peak reserved VRAM (MiB) on NVIDIA L4 ($B=2, H=4, d_h=64$). Backend probe: FP16 supports Flash, Efficient, cuDNN, and Math (default Flash); FP32 supports Efficient and Math (default Efficient; Flash and cuDNN raise \texttt{RuntimeError: No available kernel}).}
+\label{tab:t2a_app}
+\begin{tabular}{clcccccc}
+\toprule
+ & & \multicolumn{3}{c}{FP16 (SDPA: Flash)} & \multicolumn{3}{c}{FP32 (SDPA: Efficient)} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}
+$L$ & Operator & Fwd (ms) & Grad err & Res. (MiB) & Fwd (ms) & Grad err & Res. (MiB) \\
+\midrule
+256 & Dense & 0.80 & $2.2{\times}10^{-3}$ & 52.0 & 0.66 & 0.0 & 52.0 \\
+ & Tiled-64 & 6.33 & $2.2{\times}10^{-3}$ & 56.0 & 5.82 & $3.1{\times}10^{-6}$ & 56.0 \\
+ & SDPA & 0.06 & $2.3{\times}10^{-3}$ & 52.0 & 0.08 & $4.5{\times}10^{-6}$ & 54.0 \\
+\midrule
+1024 & Dense & 2.54 & $3.7{\times}10^{-3}$ & 326.0 & 2.72 & 0.0 & 300.0 \\
+ & Tiled-64 & 74.25 & $3.7{\times}10^{-3}$ & 158.0 & 65.01 & $6.2{\times}10^{-6}$ & 130.0 \\
+ & SDPA & 0.08 & $2.5{\times}10^{-3}$ & 88.0 & 0.23 & $6.7{\times}10^{-6}$ & 74.0 \\
+\midrule
+4096 & Dense & 62.14 & $2.2{\times}10^{-3}$ & 4,298.0 & 60.20 & 0.0 & 4,298.0 \\
+ & Tiled-64 & 1,032.79 & $3.6{\times}10^{-3}$ & 1,284.0 & 944.88 & $1.3{\times}10^{-5}$ & 1,540.0 \\
+ & SDPA & 0.31 & $2.4{\times}10^{-3}$ & 202.0 & 2.27 & $1.2{\times}10^{-5}$ & 714.0 \\
+\midrule
+8192 & Dense & 246.89 & $2.2{\times}10^{-3}$ & 17,098.0 & 239.07 & 0.0 & 15,018.0 \\
+ & Tiled-64 & 4,054.62 & $3.4{\times}10^{-3}$ & 4,988.0 & 3,699.31 & $2.3{\times}10^{-5}$ & 3,930.0 \\
+ & SDPA & 1.06 & $2.7{\times}10^{-3}$ & 714.0 & 9.94 & $2.6{\times}10^{-5}$ & 682.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig5_app_task2.pdf}
-\caption{Task 2 supplementary plots. Left: MQAR $K=16$ dev accuracy over updates showing \texttt{linear\_elu1} stalling on 1/3 seeds. Middle: Part B forward inference memory sweep ($T=256\dots 8192$). Right: Part C retrieval accuracy by evidence position.}
+\caption{Task 2 supplementary plots. (a) MQAR dev accuracy over updates across $K=4, 8, 16$, showing \texttt{linear\_elu1} stalling on 1/3 seeds at $K=8$ and $K=16$. (b) Part B forward inference memory sweep ($T=256\dots 8192$). (c) Part C accuracy by evidence position. (d) Part C accuracy by distractor count.}
 \label{fig:app2}
 \end{figure}
 
@@ -376,6 +399,26 @@ Q3 $-$ Q2 AWQ (INT3) & +0.205 [$-$0.045, +0.457] & $-$0.010 [$-$0.170, +0.140] &
 \caption{Task 2 Part B distance-by-load heatmap across all 14 trained MQAR configurations (3-seed mean accuracy, \%), identifying each model's training load $K$ and training regime.}
 \label{fig:app2b}
 \end{figure}
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{Task 2 Part C exact-match accuracy (\%) broken down by nominal context length ($n=90$ each), distractor count ($n=60$ each), and evidence position ($n=60$ each).}
+\label{tab:t2c_bk}
+\begin{tabular}{lcccccccc}
+\toprule
+ & \multicolumn{2}{c}{Context length} & \multicolumn{3}{c}{Distractors} & \multicolumn{3}{c}{Evidence position} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+Policy & 2,048 & 4,096 & 0 & 2 & 8 & Start & Mid & End \\
+\midrule
+\texttt{full\_fp16} & 100.0 & 100.0 & 100.0 & 100.0 & 100.0 & 100.0 & 100.0 & 100.0 \\
+\texttt{evict\_sink\_recent} & 33.3 & 33.3 & 33.3 & 33.3 & 33.3 & 0.0 & 0.0 & 100.0 \\
+\texttt{evict\_question\_aware} & 98.9 & 98.9 & 100.0 & 100.0 & 96.7 & 100.0 & 96.7 & 100.0 \\
+\texttt{quant\_int4\_tok} & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+\texttt{quant\_int4\_kivi} & 100.0 & 100.0 & 100.0 & 100.0 & 100.0 & 100.0 & 100.0 & 100.0 \\
+\texttt{hybrid\_fp16\_int2} & 98.9 & 100.0 & 100.0 & 100.0 & 98.3 & 100.0 & 98.3 & 100.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{table}[H]
 \centering\footnotesize
@@ -404,56 +447,109 @@ $B$ & $L$ & Format & Serialized (MB) & Pack (ms) & Unpack (ms) & Dec+Unpack (ms)
 \begin{figure}[H]
 \centering
 \includegraphics[width=\linewidth]{fig6_app_task3.pdf}
-\caption{Task 3 supplementary plots. Left: distillation training forward KL over the 40,000 teacher-scored tokens (5-step moving average; short-form quota starts at 30k tokens). Right: analytical speedup $\hat{S}_\gamma(\alpha)$ under measured $c=0.83$ vs. a $c=0.25$ counterfactual.}
+\caption{Task 3 supplementary plots. Left: distillation training forward KL over the 40,000 teacher-scored tokens (5-step moving average; short-form quota starts at 30k tokens). Right: analytical speedup $\hat{S}_\gamma(\alpha)$ under measured $c=0.83$ vs. a $c=0.25, v_4=1.19$ counterfactual ($\alpha^*=57.1\%$).}
 \label{fig:app3}
 \end{figure}
 
 \begin{table}[H]
 \centering\footnotesize
-\caption{Task 3 common-prefix and frozen own-rollout alignment across all five prefix-bank groups (ALL split; Off-policy and On-policy rows average the two training seeds).}
+\caption{Task 3 per-seed common-prefix and frozen own-rollout alignment across all 7 prefix banks (ALL split): Forward KL, Reverse KL, TV, expected acceptance $E[\text{acc}]=1-\text{TV}$ (\%), and greedy agreement (\%).}
 \label{tab:t3align}
-\begin{tabular}{llcccc}
+\begin{tabular}{llccccc}
 \toprule
-Prefix bank & Draft & Fwd KL & Rev KL & TV & $E[\text{acc}]$ (\%) \\
+Prefix bank & Draft & Fwd KL & Rev KL & TV & $E[\text{acc}]$ & Greedy \\
 \midrule
-\texttt{teacher} (3,875) & Original & 0.234 & 0.263 & 0.148 & 85.2 \\
- & Off-policy (2 seeds) & 0.198 & 0.256 & 0.143 & 85.7 \\
- & On-policy (2 seeds) & 0.202 & 0.282 & 0.150 & 85.0 \\
+\texttt{teacher} (3,875) & \texttt{original} & 0.234 & 0.263 & 0.148 & 85.2 & 86.0 \\
+ & \texttt{offpolicy\_s6304} & 0.196 & 0.260 & 0.143 & 85.7 & 87.3 \\
+ & \texttt{offpolicy\_s6305} & 0.200 & 0.252 & 0.142 & 85.8 & 86.9 \\
+ & \texttt{onpolicy\_s6304} & 0.202 & 0.285 & 0.150 & 85.0 & 87.0 \\
+ & \texttt{onpolicy\_s6305} & 0.202 & 0.280 & 0.150 & 85.0 & 86.6 \\
 \midrule
-\texttt{original\_draft} (3,876) & Original & 0.289 & 0.283 & 0.171 & 82.9 \\
- & Off-policy (2 seeds) & 0.240 & 0.272 & 0.164 & 83.6 \\
- & On-policy (2 seeds) & 0.232 & 0.284 & 0.167 & 83.3 \\
+\texttt{original\_draft} (3,876) & \texttt{original} & 0.289 & 0.283 & 0.171 & 82.9 & 82.6 \\
+ & \texttt{offpolicy\_s6304} & 0.237 & 0.274 & 0.164 & 83.6 & 83.4 \\
+ & \texttt{offpolicy\_s6305} & 0.242 & 0.270 & 0.163 & 83.7 & 83.2 \\
+ & \texttt{onpolicy\_s6304} & 0.230 & 0.285 & 0.167 & 83.3 & 83.6 \\
+ & \texttt{onpolicy\_s6305} & 0.234 & 0.282 & 0.168 & 83.2 & 83.3 \\
 \midrule
-\texttt{exact\_spec\_orig\_g4} (3,535) & Original & 0.184 & 0.213 & 0.121 & 87.9 \\
- & Off-policy (2 seeds) & 0.161 & 0.215 & 0.118 & 88.2 \\
- & On-policy (2 seeds) & 0.163 & 0.240 & 0.125 & 87.5 \\
+\texttt{exact\_spec\_orig\_g4} (3,535) & \texttt{original} & 0.184 & 0.213 & 0.121 & 87.9 & 88.2 \\
+ & \texttt{offpolicy\_s6304} & 0.159 & 0.220 & 0.119 & 88.1 & 89.0 \\
+ & \texttt{offpolicy\_s6305} & 0.163 & 0.210 & 0.117 & 88.3 & 88.6 \\
+ & \texttt{onpolicy\_s6304} & 0.161 & 0.240 & 0.124 & 87.6 & 89.1 \\
+ & \texttt{onpolicy\_s6305} & 0.166 & 0.241 & 0.126 & 87.4 & 88.5 \\
 \midrule
-\texttt{own\_offpolicy} (avg 2 seeds) & Original & 0.335 & 0.323 & 0.194 & 80.6 \\
- & Off-policy (2 seeds) & 0.274 & 0.296 & 0.182 & 81.8 \\
- & On-policy (2 seeds) & 0.265 & 0.308 & 0.184 & 81.6 \\
+\texttt{own\_offpolicy\_s6304} (3,671) & \texttt{original} & 0.353 & 0.340 & 0.204 & 79.6 & 78.9 \\
+ & \texttt{offpolicy\_s6304} & 0.288 & 0.314 & 0.191 & 80.9 & 80.6 \\
+ & \texttt{offpolicy\_s6305} & 0.294 & 0.312 & 0.190 & 81.0 & 80.4 \\
+ & \texttt{onpolicy\_s6304} & 0.278 & 0.324 & 0.193 & 80.7 & 80.7 \\
+ & \texttt{onpolicy\_s6305} & 0.282 & 0.322 & 0.193 & 80.7 & 81.1 \\
 \midrule
-\texttt{own\_onpolicy} (avg 2 seeds) & Original & 0.404 & 0.387 & 0.229 & 77.1 \\
- & Off-policy (2 seeds) & 0.328 & 0.348 & 0.213 & 78.7 \\
- & On-policy (2 seeds) & 0.315 & 0.352 & 0.213 & 78.7 \\
+\texttt{own\_offpolicy\_s6305} (3,601) & \texttt{original} & 0.317 & 0.306 & 0.184 & 81.6 & 80.4 \\
+ & \texttt{offpolicy\_s6304} & 0.256 & 0.282 & 0.174 & 82.6 & 82.3 \\
+ & \texttt{offpolicy\_s6305} & 0.257 & 0.275 & 0.172 & 82.8 & 82.3 \\
+ & \texttt{onpolicy\_s6304} & 0.249 & 0.296 & 0.176 & 82.4 & 82.1 \\
+ & \texttt{onpolicy\_s6305} & 0.250 & 0.289 & 0.176 & 82.4 & 82.3 \\
+\midrule
+\texttt{own\_onpolicy\_s6304} (3,907) & \texttt{original} & 0.403 & 0.383 & 0.227 & 77.3 & 76.0 \\
+ & \texttt{offpolicy\_s6304} & 0.327 & 0.350 & 0.213 & 78.7 & 78.1 \\
+ & \texttt{offpolicy\_s6305} & 0.328 & 0.345 & 0.211 & 78.9 & 77.6 \\
+ & \texttt{onpolicy\_s6304} & 0.312 & 0.352 & 0.212 & 78.8 & 78.0 \\
+ & \texttt{onpolicy\_s6305} & 0.317 & 0.349 & 0.212 & 78.8 & 78.1 \\
+\midrule
+\texttt{own\_onpolicy\_s6305} (3,872) & \texttt{original} & 0.406 & 0.392 & 0.231 & 76.9 & 74.6 \\
+ & \texttt{offpolicy\_s6304} & 0.328 & 0.350 & 0.214 & 78.6 & 76.7 \\
+ & \texttt{offpolicy\_s6305} & 0.329 & 0.347 & 0.213 & 78.7 & 76.7 \\
+ & \texttt{onpolicy\_s6304} & 0.317 & 0.359 & 0.215 & 78.5 & 77.2 \\
+ & \texttt{onpolicy\_s6305} & 0.316 & 0.347 & 0.213 & 78.7 & 77.3 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{table}[H]
 \centering\footnotesize
-\caption{Task 3 workload breakdown ($\gamma=2$) on \texttt{spec120} and the 24-prompt ignore-EOS fixed-64 diagnostic (\texttt{diag24}).}
+\caption{Task 3 workload breakdown for both $\gamma=2$ and $\gamma=4$ on \texttt{spec120} (pooled Acc/Ex \% and ratio-of-means total speedup $S_{\text{tot}}$) and the 24-prompt ignore-EOS fixed-64 diagnostic (\texttt{diag24}).}
 \label{tab:t3sub}
 \begin{tabular}{lcccccccc}
 \toprule
- & \multicolumn{2}{c}{Math ($\bar{L}=64$)} & \multicolumn{2}{c}{Short fam. ($\bar{L}\approx 20$)} & \multicolumn{2}{c}{Short shift. ($\bar{L}\approx 12$)} & \multicolumn{2}{c}{\texttt{diag24} fixed-64} \\
+ & \multicolumn{2}{c}{Math ($\bar{L}\approx 64$)} & \multicolumn{2}{c}{Short fam. ($\bar{L}\approx 20$)} & \multicolumn{2}{c}{Short shift. ($\bar{L}\approx 12$)} & \multicolumn{2}{c}{\texttt{diag24} fixed-64} \\
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
-Draft ($\gamma=2$) & Acc & $S_{\text{tot}}$ & Acc & $S_{\text{tot}}$ & Acc & $S_{\text{tot}}$ & tok/s & $S_{\text{tot}}$ \\
+Draft & Acc & $S_{\text{tot}}$ & Acc & $S_{\text{tot}}$ & Acc & $S_{\text{tot}}$ & tok/s & $S_{\text{tot}}$ \\
 \midrule
-\texttt{original} & 87.6 & 0.834 & 78.6 & 0.723 & 83.4 & 0.696 & 27.13 & 0.843 \\
-\texttt{offpolicy\_s6304} & 88.3 & 0.837 & 87.4 & 0.763 & 79.4 & 0.668 & 27.79 & 0.851 \\
-\texttt{offpolicy\_s6305} & 88.8 & 0.841 & 86.0 & 0.758 & 79.1 & 0.657 & 27.68 & 0.846 \\
-\texttt{onpolicy\_s6304} & 87.8 & 0.833 & 87.4 & 0.757 & 78.2 & 0.638 & 27.54 & 0.845 \\
-\texttt{onpolicy\_s6305} & 87.7 & 0.831 & 87.3 & 0.773 & 79.6 & 0.659 & 27.14 & 0.837 \\
+\texttt{original} ($\gamma=2$) & 87.6 & 0.835 & 78.6 & 0.650 & 83.4 & 0.680 & 27.83 & 0.840 \\
+\texttt{offpolicy\_s6304} ($\gamma=2$) & 88.3 & 0.837 & 87.4 & 0.867 & 79.4 & 0.643 & 28.50 & 0.849 \\
+\texttt{offpolicy\_s6305} ($\gamma=2$) & 88.8 & 0.841 & 86.0 & 0.797 & 79.1 & 0.675 & 28.40 & 0.843 \\
+\texttt{onpolicy\_s6304} ($\gamma=2$) & 87.8 & 0.837 & 87.4 & 0.891 & 78.2 & 0.719 & 28.26 & 0.842 \\
+\texttt{onpolicy\_s6305} ($\gamma=2$) & 87.7 & 0.834 & 87.3 & 0.808 & 79.6 & 0.698 & 27.82 & 0.834 \\
+\midrule
+\texttt{original} ($\gamma=4$) & 89.0 & 0.811 & 79.2 & 0.624 & 78.4 & 0.545 & 27.68 & 0.824 \\
+\texttt{offpolicy\_s6304} ($\gamma=4$) & 87.6 & 0.790 & 86.3 & 0.681 & 78.7 & 0.577 & 26.89 & 0.799 \\
+\texttt{offpolicy\_s6305} ($\gamma=4$) & 88.2 & 0.801 & 86.5 & 0.685 & 81.1 & 0.592 & 26.87 & 0.800 \\
+\texttt{onpolicy\_s6304} ($\gamma=4$) & 87.6 & 0.795 & 83.1 & 0.662 & 76.9 & 0.554 & 27.23 & 0.814 \\
+\texttt{onpolicy\_s6305} ($\gamma=4$) & 87.5 & 0.790 & 87.9 & 0.769 & 77.5 & 0.551 & 26.98 & 0.807 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{Task 3 paired bootstrap 95\% confidence intervals (2,000 resamples across the 120 prompts) for per-prompt macro Acc/Ex (pp) and total throughput (\texttt{tok/s}).}
+\label{tab:t3ci}
+\begin{tabular}{lcc}
+\toprule
+Comparison (A $-$ B) & $\Delta$ Macro Acc/Ex (pp) & $\Delta$ Total tok/s \\
+\midrule
+\texttt{offpolicy\_s6304} $-$ \texttt{original} ($\gamma=2$) & +1.98 [+0.21, +3.85] & +0.20 [$-$0.17, +0.54] \\
+\texttt{offpolicy\_s6305} $-$ \texttt{original} ($\gamma=2$) & +2.75 [+1.02, +4.65] & +0.30 [$-$0.09, +0.67] \\
+\texttt{onpolicy\_s6304} $-$ \texttt{original} ($\gamma=2$) & +1.51 [$-$0.52, +3.59] & +0.11 [$-$0.23, +0.47] \\
+\texttt{onpolicy\_s6305} $-$ \texttt{original} ($\gamma=2$) & +1.49 [$-$0.42, +3.44] & +0.09 [$-$0.30, +0.46] \\
+\texttt{onpolicy\_s6304} $-$ \texttt{offpolicy\_s6304} ($\gamma=2$) & $-$0.47 [$-$1.65, +0.65] & $-$0.09 [$-$0.35, +0.19] \\
+\texttt{onpolicy\_s6305} $-$ \texttt{offpolicy\_s6305} ($\gamma=2$) & $-$1.27 [$-$2.57, $-$0.09] & $-$0.21 [$-$0.44, +0.02] \\
+\midrule
+\texttt{offpolicy\_s6304} $-$ \texttt{original} ($\gamma=4$) & +0.76 [$-$0.49, +2.19] & +0.30 [$-$0.20, +0.84] \\
+\texttt{offpolicy\_s6305} $-$ \texttt{original} ($\gamma=4$) & +1.08 [+0.04, +2.27] & +0.48 [+0.02, +1.00] \\
+\texttt{onpolicy\_s6304} $-$ \texttt{original} ($\gamma=4$) & $-$0.64 [$-$2.16, +1.00] & $-$0.05 [$-$0.58, +0.52] \\
+\texttt{onpolicy\_s6305} $-$ \texttt{original} ($\gamma=4$) & $-$0.08 [$-$1.30, +1.24] & $-$0.04 [$-$0.52, +0.50] \\
+\texttt{onpolicy\_s6304} $-$ \texttt{offpolicy\_s6304} ($\gamma=4$) & $-$1.40 [$-$2.77, $-$0.11] & $-$0.35 [$-$0.83, +0.12] \\
+\texttt{onpolicy\_s6305} $-$ \texttt{offpolicy\_s6305} ($\gamma=4$) & $-$1.15 [$-$2.10, $-$0.22] & $-$0.52 [$-$0.93, $-$0.12] \\
 \bottomrule
 \end{tabular}
 \end{table}
