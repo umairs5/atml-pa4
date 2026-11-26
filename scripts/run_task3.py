@@ -37,6 +37,7 @@ from src.task3.eval_task3 import (
 )
 from src.task3.speculative import (
     speculative_generate,
+    target_only_generate,
     validate_markov_chi2,
 )
 
