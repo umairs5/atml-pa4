@@ -1,0 +1,436 @@
+{
+  "run_id": "B1_dense_K4_mixed_s6306",
+  "group": "B1",
+  "mechanism": "dense",
+  "train_k": 4,
+  "train_regime": "mixed",
+  "seed": 6306,
+  "trainable_params": 436736,
+  "train_time_sec": 50.45224056899997,
+  "learning_curve": [
+    {
+      "step": 500,
+      "train_loss": 1.9694358110427856,
+      "dev_loss": 1.9952280521392822,
+      "dev_acc": 0.25,
+      "by_cell": {
+        "K4_far": {
+          "acc": 0.244140625,
+          "correct": 250,
+          "count": 1024
+        },
+        "K4_mixed": {
+          "acc": 0.25390625,
+          "correct": 260,
+          "count": 1024
+        },
+        "K4_near": {
+          "acc": 0.251953125,
+          "correct": 258,
+          "count": 1024
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 0.2402044293015332,
+          "correct": 141,
+          "count": 587
+        },
+        "[32,64)": {
+          "acc": 0.2753623188405797,
+          "correct": 190,
+          "count": 690
+        },
+        "[64,128)": {
+          "acc": 0.22580645161290322,
+          "correct": 63,
+          "count": 279
+        },
+        "[128,256)": {
+          "acc": 0.24670184696569922,
+          "correct": 374,
+          "count": 1516
+        }
+      },
+      "elapsed_sec": 5.625410135999971
+    },
+    {
+      "step": 1000,
+      "train_loss": 0.01075153797864914,
+      "dev_loss": 0.01211712664614121,
+      "dev_acc": 0.9986979166666666,
+      "by_cell": {
+        "K4_far": {
+          "acc": 0.9990234375,
+          "correct": 1023,
+          "count": 1024
+        },
+        "K4_mixed": {
+          "acc": 0.998046875,
+          "correct": 1022,
+          "count": 1024
+        },
+        "K4_near": {
+          "acc": 0.9990234375,
+          "correct": 1023,
+          "count": 1024
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 1.0,
+          "correct": 587,
+          "count": 587
+        },
+        "[32,64)": {
+          "acc": 0.9985507246376811,
+          "correct": 689,
+          "count": 690
+        },
+        "[64,128)": {
+          "acc": 1.0,
+          "correct": 279,
+          "count": 279
+        },
+        "[128,256)": {
+          "acc": 0.9980211081794196,
+          "correct": 1513,
+          "count": 1516
+        }
+      },
+      "elapsed_sec": 11.247135508999975
+    },
+    {
+      "step": 1500,
+      "train_loss": 0.0024001605343073606,
+      "dev_loss": 0.004198752188434203,
+      "dev_acc": 0.9993489583333334,
+      "by_cell": {
+        "K4_far": {
+          "acc": 0.9990234375,
+          "correct": 1023,
+          "count": 1024
+        },
+        "K4_mixed": {
+          "acc": 1.0,
+          "correct": 1024,
+          "count": 1024
+        },
+        "K4_near": {
+          "acc": 0.9990234375,
+          "correct": 1023,
+          "count": 1024
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 0.9982964224872232,
+          "correct": 586,
+          "count": 587
+        },
+        "[32,64)": {
+          "acc": 1.0,
+          "correct": 690,
+          "count": 690
+        },
+        "[64,128)": {
+          "acc": 1.0,
+          "correct": 279,
+          "count": 279
+        },
+        "[128,256)": {
+          "acc": 0.9993403693931399,
+          "correct": 1515,
+          "count": 1516
+        }
+      },
+      "elapsed_sec": 16.899400647999983
+    },
+    {
+      "step": 2000,
+      "train_loss": 0.0013599077938124537,
+      "dev_loss": 0.0014575275708921254,
+      "dev_acc": 1.0,
+      "by_cell": {
+        "K4_far": {
+          "acc": 1.0,
+          "correct": 1024,
+          "count": 1024
+        },
+        "K4_mixed": {
+          "acc": 1.0,
+          "correct": 1024,
+          "count": 1024
+        },
+        "K4_near": {
+          "acc": 1.0,
+          "correct": 1024,
+          "count": 1024
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 1.0,
+          "correct": 587,
+          "count": 587
+        },
+        "[32,64)": {
+          "acc": 1.0,
+          "correct": 690,
+          "count": 690
+        },
+        "[64,128)": {
+          "acc": 1.0,
+          "correct": 279,
+          "count": 279
+        },
+        "[128,256)": {
+          "acc": 1.0,
+          "correct": 1516,
+          "count": 1516
+        }
+      },
+      "elapsed_sec": 22.539306115999977
+    },
+    {
+      "step": 3000,
+      "train_loss": 0.0006069589871913195,
+      "dev_loss": 0.0010632700965895008,
+      "dev_acc": 1.0,
+      "by_cell": {
+        "K4_far": {
+          "acc": 1.0,
+          "correct": 1024,
+          "count": 1024
+        },
+        "K4_mixed": {
+          "acc": 1.0,
+          "correct": 1024,
+          "count": 1024
+        },
+        "K4_near": {
+          "acc": 1.0,
+          "correct": 1024,
+          "count": 1024
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 1.0,
+          "correct": 587,
+          "count": 587
+        },
+        "[32,64)": {
+          "acc": 1.0,
+          "correct": 690,
+          "count": 690
+        },
+        "[64,128)": {
+          "acc": 1.0,
+          "correct": 279,
+          "count": 279
+        },
+        "[128,256)": {
+          "acc": 1.0,
+          "correct": 1516,
+          "count": 1516
+        }
+      },
+      "elapsed_sec": 33.704566299999954
+    },
+    {
+      "step": 4500,
+      "train_loss": 0.00037567506660707295,
+      "dev_loss": 0.00034938398069546867,
+      "dev_acc": 1.0,
+      "by_cell": {
+        "K4_far": {
+          "acc": 1.0,
+          "correct": 1024,
+          "count": 1024
+        },
+        "K4_mixed": {
+          "acc": 1.0,
+          "correct": 1024,
+          "count": 1024
+        },
+        "K4_near": {
+          "acc": 1.0,
+          "correct": 1024,
+          "count": 1024
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 1.0,
+          "correct": 587,
+          "count": 587
+        },
+        "[32,64)": {
+          "acc": 1.0,
+          "correct": 690,
+          "count": 690
+        },
+        "[64,128)": {
+          "acc": 1.0,
+          "correct": 279,
+          "count": 279
+        },
+        "[128,256)": {
+          "acc": 1.0,
+          "correct": 1516,
+          "count": 1516
+        }
+      },
+      "elapsed_sec": 50.452100557999984
+    }
+  ],
+  "test_eval": {
+    "accuracy": 0.50634765625,
+    "loss": 4.282267872511078,
+    "total_queries": 86016,
+    "by_cell": {
+      "K4_far": {
+        "acc": 1.0,
+        "correct": 4096,
+        "count": 4096
+      },
+      "K4_mixed": {
+        "acc": 1.0,
+        "correct": 4096,
+        "count": 4096
+      },
+      "K4_near": {
+        "acc": 1.0,
+        "correct": 4096,
+        "count": 4096
+      },
+      "K8_far": {
+        "acc": 0.630126953125,
+        "correct": 5162,
+        "count": 8192
+      },
+      "K8_mixed": {
+        "acc": 0.63134765625,
+        "correct": 5172,
+        "count": 8192
+      },
+      "K8_near": {
+        "acc": 0.6318359375,
+        "correct": 5176,
+        "count": 8192
+      },
+      "K16_far": {
+        "acc": 0.31884765625,
+        "correct": 5224,
+        "count": 16384
+      },
+      "K16_mixed": {
+        "acc": 0.32037353515625,
+        "correct": 5249,
+        "count": 16384
+      },
+      "K16_near": {
+        "acc": 0.32244873046875,
+        "correct": 5283,
+        "count": 16384
+      }
+    },
+    "by_distance_bin": {
+      "[0,32)": {
+        "acc": 0.4507895860008536,
+        "correct": 5281,
+        "count": 11715
+      },
+      "[32,64)": {
+        "acc": 0.5295233169554349,
+        "correct": 12286,
+        "count": 23202
+      },
+      "[64,128)": {
+        "acc": 0.4923440806672476,
+        "correct": 3955,
+        "count": 8033
+      },
+      "[128,256)": {
+        "acc": 0.5115868666697627,
+        "correct": 22032,
+        "count": 43066
+      }
+    }
+  },
+  "test_eval_w64_mask_control": {
+    "accuracy": 0.22042410714285715,
+    "loss": 6.132202702721163,
+    "total_queries": 86016,
+    "by_cell": {
+      "K4_far": {
+        "acc": 0.013916015625,
+        "correct": 57,
+        "count": 4096
+      },
+      "K4_mixed": {
+        "acc": 0.260009765625,
+        "correct": 1065,
+        "count": 4096
+      },
+      "K4_near": {
+        "acc": 1.0,
+        "correct": 4096,
+        "count": 4096
+      },
+      "K8_far": {
+        "acc": 0.0166015625,
+        "correct": 136,
+        "count": 8192
+      },
+      "K8_mixed": {
+        "acc": 0.1566162109375,
+        "correct": 1283,
+        "count": 8192
+      },
+      "K8_near": {
+        "acc": 0.640380859375,
+        "correct": 5246,
+        "count": 8192
+      },
+      "K16_far": {
+        "acc": 0.0162353515625,
+        "correct": 266,
+        "count": 16384
+      },
+      "K16_mixed": {
+        "acc": 0.07281494140625,
+        "correct": 1193,
+        "count": 16384
+      },
+      "K16_near": {
+        "acc": 0.3428955078125,
+        "correct": 5618,
+        "count": 16384
+      }
+    },
+    "by_distance_bin": {
+      "[0,32)": {
+        "acc": 0.4507895860008536,
+        "correct": 5281,
+        "count": 11715
+      },
+      "[32,64)": {
+        "acc": 0.5505559865528834,
+        "correct": 12774,
+        "count": 23202
+      },
+      "[64,128)": {
+        "acc": 0.02701356902776049,
+        "correct": 217,
+        "count": 8033
+      },
+      "[128,256)": {
+        "acc": 0.015975479496586634,
+        "correct": 688,
+        "count": 43066
+      }
+    }
+  }
+}

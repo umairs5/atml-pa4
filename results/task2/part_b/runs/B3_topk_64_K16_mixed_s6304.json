@@ -1,0 +1,363 @@
+{
+  "run_id": "B3_topk_64_K16_mixed_s6304",
+  "group": "B3",
+  "mechanism": "topk_64",
+  "train_k": 16,
+  "train_regime": "mixed",
+  "seed": 6304,
+  "trainable_params": 436736,
+  "train_time_sec": 70.9630728080001,
+  "learning_curve": [
+    {
+      "step": 500,
+      "train_loss": 3.7432172298431396,
+      "dev_loss": 3.7481550375620523,
+      "dev_acc": 0.060221354166666664,
+      "by_cell": {
+        "K16_far": {
+          "acc": 0.05908203125,
+          "correct": 242,
+          "count": 4096
+        },
+        "K16_mixed": {
+          "acc": 0.059814453125,
+          "correct": 245,
+          "count": 4096
+        },
+        "K16_near": {
+          "acc": 0.061767578125,
+          "correct": 253,
+          "count": 4096
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 0.06169296987087518,
+          "correct": 86,
+          "count": 1394
+        },
+        "[32,64)": {
+          "acc": 0.06112196483393804,
+          "correct": 219,
+          "count": 3583
+        },
+        "[64,128)": {
+          "acc": 0.06720430107526881,
+          "correct": 75,
+          "count": 1116
+        },
+        "[128,256)": {
+          "acc": 0.05811138014527845,
+          "correct": 360,
+          "count": 6195
+        }
+      },
+      "elapsed_sec": 7.954561213000034
+    },
+    {
+      "step": 1000,
+      "train_loss": 3.3199329376220703,
+      "dev_loss": 3.3093177874883017,
+      "dev_acc": 0.061197916666666664,
+      "by_cell": {
+        "K16_far": {
+          "acc": 0.06298828125,
+          "correct": 258,
+          "count": 4096
+        },
+        "K16_mixed": {
+          "acc": 0.06005859375,
+          "correct": 246,
+          "count": 4096
+        },
+        "K16_near": {
+          "acc": 0.060546875,
+          "correct": 248,
+          "count": 4096
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 0.05810616929698709,
+          "correct": 81,
+          "count": 1394
+        },
+        "[32,64)": {
+          "acc": 0.06028467764443204,
+          "correct": 216,
+          "count": 3583
+        },
+        "[64,128)": {
+          "acc": 0.05824372759856631,
+          "correct": 65,
+          "count": 1116
+        },
+        "[128,256)": {
+          "acc": 0.06295399515738499,
+          "correct": 390,
+          "count": 6195
+        }
+      },
+      "elapsed_sec": 15.936983731000055
+    },
+    {
+      "step": 1500,
+      "train_loss": 0.017253663390874863,
+      "dev_loss": 0.024567487960060436,
+      "dev_acc": 0.9973958333333334,
+      "by_cell": {
+        "K16_far": {
+          "acc": 0.997802734375,
+          "correct": 4087,
+          "count": 4096
+        },
+        "K16_mixed": {
+          "acc": 0.99658203125,
+          "correct": 4082,
+          "count": 4096
+        },
+        "K16_near": {
+          "acc": 0.997802734375,
+          "correct": 4087,
+          "count": 4096
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 0.994261119081779,
+          "correct": 1386,
+          "count": 1394
+        },
+        "[32,64)": {
+          "acc": 0.9980463298911527,
+          "correct": 3576,
+          "count": 3583
+        },
+        "[64,128)": {
+          "acc": 0.9991039426523297,
+          "correct": 1115,
+          "count": 1116
+        },
+        "[128,256)": {
+          "acc": 0.9974172719935431,
+          "correct": 6179,
+          "count": 6195
+        }
+      },
+      "elapsed_sec": 23.94938726700002
+    },
+    {
+      "step": 2000,
+      "train_loss": 0.0020397454500198364,
+      "dev_loss": 0.002075894949181626,
+      "dev_acc": 1.0,
+      "by_cell": {
+        "K16_far": {
+          "acc": 1.0,
+          "correct": 4096,
+          "count": 4096
+        },
+        "K16_mixed": {
+          "acc": 1.0,
+          "correct": 4096,
+          "count": 4096
+        },
+        "K16_near": {
+          "acc": 1.0,
+          "correct": 4096,
+          "count": 4096
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 1.0,
+          "correct": 1394,
+          "count": 1394
+        },
+        "[32,64)": {
+          "acc": 1.0,
+          "correct": 3583,
+          "count": 3583
+        },
+        "[64,128)": {
+          "acc": 1.0,
+          "correct": 1116,
+          "count": 1116
+        },
+        "[128,256)": {
+          "acc": 1.0,
+          "correct": 6195,
+          "count": 6195
+        }
+      },
+      "elapsed_sec": 31.905890033000105
+    },
+    {
+      "step": 3000,
+      "train_loss": 0.0006667906418442726,
+      "dev_loss": 0.0007637913901514063,
+      "dev_acc": 1.0,
+      "by_cell": {
+        "K16_far": {
+          "acc": 1.0,
+          "correct": 4096,
+          "count": 4096
+        },
+        "K16_mixed": {
+          "acc": 1.0,
+          "correct": 4096,
+          "count": 4096
+        },
+        "K16_near": {
+          "acc": 1.0,
+          "correct": 4096,
+          "count": 4096
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 1.0,
+          "correct": 1394,
+          "count": 1394
+        },
+        "[32,64)": {
+          "acc": 1.0,
+          "correct": 3583,
+          "count": 3583
+        },
+        "[64,128)": {
+          "acc": 1.0,
+          "correct": 1116,
+          "count": 1116
+        },
+        "[128,256)": {
+          "acc": 1.0,
+          "correct": 6195,
+          "count": 6195
+        }
+      },
+      "elapsed_sec": 47.56117994399983
+    },
+    {
+      "step": 4500,
+      "train_loss": 0.0002951990463770926,
+      "dev_loss": 0.00032466599077451974,
+      "dev_acc": 1.0,
+      "by_cell": {
+        "K16_far": {
+          "acc": 1.0,
+          "correct": 4096,
+          "count": 4096
+        },
+        "K16_mixed": {
+          "acc": 1.0,
+          "correct": 4096,
+          "count": 4096
+        },
+        "K16_near": {
+          "acc": 1.0,
+          "correct": 4096,
+          "count": 4096
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 1.0,
+          "correct": 1394,
+          "count": 1394
+        },
+        "[32,64)": {
+          "acc": 1.0,
+          "correct": 3583,
+          "count": 3583
+        },
+        "[64,128)": {
+          "acc": 1.0,
+          "correct": 1116,
+          "count": 1116
+        },
+        "[128,256)": {
+          "acc": 1.0,
+          "correct": 6195,
+          "count": 6195
+        }
+      },
+      "elapsed_sec": 70.96293011099988
+    }
+  ],
+  "test_eval": {
+    "accuracy": 0.9998372395833334,
+    "loss": 0.001263234450951651,
+    "total_queries": 86016,
+    "by_cell": {
+      "K4_far": {
+        "acc": 1.0,
+        "correct": 4096,
+        "count": 4096
+      },
+      "K4_mixed": {
+        "acc": 0.999267578125,
+        "correct": 4093,
+        "count": 4096
+      },
+      "K4_near": {
+        "acc": 0.9990234375,
+        "correct": 4092,
+        "count": 4096
+      },
+      "K8_far": {
+        "acc": 1.0,
+        "correct": 8192,
+        "count": 8192
+      },
+      "K8_mixed": {
+        "acc": 0.9996337890625,
+        "correct": 8189,
+        "count": 8192
+      },
+      "K8_near": {
+        "acc": 0.99951171875,
+        "correct": 8188,
+        "count": 8192
+      },
+      "K16_far": {
+        "acc": 1.0,
+        "correct": 16384,
+        "count": 16384
+      },
+      "K16_mixed": {
+        "acc": 1.0,
+        "correct": 16384,
+        "count": 16384
+      },
+      "K16_near": {
+        "acc": 1.0,
+        "correct": 16384,
+        "count": 16384
+      }
+    },
+    "by_distance_bin": {
+      "[0,32)": {
+        "acc": 0.998804950917627,
+        "correct": 11701,
+        "count": 11715
+      },
+      "[32,64)": {
+        "acc": 1.0,
+        "correct": 23202,
+        "count": 23202
+      },
+      "[64,128)": {
+        "acc": 1.0,
+        "correct": 8033,
+        "count": 8033
+      },
+      "[128,256)": {
+        "acc": 1.0,
+        "correct": 43066,
+        "count": 43066
+      }
+    }
+  },
+  "test_eval_w64_mask_control": null
+}

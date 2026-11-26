@@ -1,0 +1,22 @@
+{
+  "offpolicy_s6304": {
+    "merge_time_sec": 8.380494544000044,
+    "merged_vs_unmerged_max_abs_diff": 0.296875,
+    "merged_vs_unmerged_mean_abs_diff": 0.007885848172008991
+  },
+  "offpolicy_s6305": {
+    "merge_time_sec": 3.377177071999995,
+    "merged_vs_unmerged_max_abs_diff": 0.484375,
+    "merged_vs_unmerged_mean_abs_diff": 0.007301711477339268
+  },
+  "onpolicy_s6304": {
+    "merge_time_sec": 3.352879659999985,
+    "merged_vs_unmerged_max_abs_diff": 0.267578125,
+    "merged_vs_unmerged_mean_abs_diff": 0.007522996980696917
+  },
+  "onpolicy_s6305": {
+    "merge_time_sec": 3.4747353970000177,
+    "merged_vs_unmerged_max_abs_diff": 0.29296875,
+    "merged_vs_unmerged_mean_abs_diff": 0.007390826474875212
+  }
+}

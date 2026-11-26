@@ -1,0 +1,1166 @@
+{
+  "mode": "onpolicy",
+  "seed": 6305,
+  "param_counts": {
+    "frozen_backbone_params": 494032768,
+    "trainable_lora_params": 1081344,
+    "total_params": 495114112
+  },
+  "peak_allocated_bytes": 6378407936,
+  "math_scored_tokens": 30000,
+  "short_scored_tokens": 10000,
+  "total_scored_tokens": 40000,
+  "optimizer_steps": 114,
+  "skipped_overflow_steps": 3,
+  "mean_raw_math_len": 187.24844720496895,
+  "mean_raw_short_len": 19.745562130177515,
+  "timing_sec": {
+    "total_train_loop_sec": 1946.4328713349987,
+    "teacher_scoring_sec": 28.602835479983696,
+    "student_rollout_sec": 1814.098895590996,
+    "student_fwd_bwd_opt_sec": 102.78366006297256,
+    "teacher_pool_prep_sec": 0.0
+  },
+  "learning_curve": [
+    {
+      "optimizer_step": 1,
+      "teacher_scored_tokens": 384,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.17797999580701193,
+      "lr": 0.0003,
+      "grad_norm": 0.7880527377128601,
+      "overflow_skipped": false,
+      "elapsed_sec": 17.375383290998798
+    },
+    {
+      "optimizer_step": 2,
+      "teacher_scored_tokens": 707,
+      "step_tokens": 323,
+      "mean_kl_loss": 0.3086849661434398,
+      "lr": 0.0003,
+      "grad_norm": 0.9235037565231323,
+      "overflow_skipped": false,
+      "elapsed_sec": 32.353900193998925
+    },
+    {
+      "optimizer_step": 3,
+      "teacher_scored_tokens": 1153,
+      "step_tokens": 446,
+      "mean_kl_loss": 0.27924470218825637,
+      "lr": 0.0003,
+      "grad_norm": 0.7767300605773926,
+      "overflow_skipped": false,
+      "elapsed_sec": 53.378444885000135
+    },
+    {
+      "optimizer_step": 4,
+      "teacher_scored_tokens": 1537,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.4134312669436137,
+      "lr": 0.0003,
+      "grad_norm": NaN,
+      "overflow_skipped": true,
+      "elapsed_sec": 70.89971860500009
+    },
+    {
+      "optimizer_step": 5,
+      "teacher_scored_tokens": 1926,
+      "step_tokens": 389,
+      "mean_kl_loss": 0.38882691756005766,
+      "lr": 0.0003,
+      "grad_norm": 0.8635740280151367,
+      "overflow_skipped": false,
+      "elapsed_sec": 89.02567522400022
+    },
+    {
+      "optimizer_step": 6,
+      "teacher_scored_tokens": 2312,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.2732506340340629,
+      "lr": 0.0003,
+      "grad_norm": 0.6448897123336792,
+      "overflow_skipped": false,
+      "elapsed_sec": 107.15809112199895
+    },
+    {
+      "optimizer_step": 7,
+      "teacher_scored_tokens": 2661,
+      "step_tokens": 349,
+      "mean_kl_loss": 0.4468607642930695,
+      "lr": 0.0003,
+      "grad_norm": 1.0633156299591064,
+      "overflow_skipped": false,
+      "elapsed_sec": 123.36251522899875
+    },
+    {
+      "optimizer_step": 8,
+      "teacher_scored_tokens": 3077,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.31971752414336574,
+      "lr": 0.0003,
+      "grad_norm": 0.5277348160743713,
+      "overflow_skipped": false,
+      "elapsed_sec": 142.94615997999972
+    },
+    {
+      "optimizer_step": 9,
+      "teacher_scored_tokens": 3463,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.35615337321563706,
+      "lr": 0.0003,
+      "grad_norm": 0.6259990930557251,
+      "overflow_skipped": false,
+      "elapsed_sec": 161.09668284999861
+    },
+    {
+      "optimizer_step": 10,
+      "teacher_scored_tokens": 3847,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.40219809611638385,
+      "lr": 0.0003,
+      "grad_norm": 0.7464548945426941,
+      "overflow_skipped": false,
+      "elapsed_sec": 178.93629614999918
+    },
+    {
+      "optimizer_step": 11,
+      "teacher_scored_tokens": 4233,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.4113960926628483,
+      "lr": 0.0003,
+      "grad_norm": 0.7316128611564636,
+      "overflow_skipped": false,
+      "elapsed_sec": 196.8973423239986
+    },
+    {
+      "optimizer_step": 12,
+      "teacher_scored_tokens": 4649,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.42757221597891587,
+      "lr": 0.0003,
+      "grad_norm": 0.7458868026733398,
+      "overflow_skipped": false,
+      "elapsed_sec": 216.23444697000014
+    },
+    {
+      "optimizer_step": 13,
+      "teacher_scored_tokens": 5033,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.432347575823466,
+      "lr": 0.0003,
+      "grad_norm": 0.7037532329559326,
+      "overflow_skipped": false,
+      "elapsed_sec": 233.94975516399973
+    },
+    {
+      "optimizer_step": 14,
+      "teacher_scored_tokens": 5449,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.3553014305921701,
+      "lr": 0.0003,
+      "grad_norm": 0.4553696811199188,
+      "overflow_skipped": false,
+      "elapsed_sec": 253.36942981299944
+    },
+    {
+      "optimizer_step": 15,
+      "teacher_scored_tokens": 5835,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.40435365458149364,
+      "lr": 0.0003,
+      "grad_norm": 0.7062652707099915,
+      "overflow_skipped": false,
+      "elapsed_sec": 271.4450163900001
+    },
+    {
+      "optimizer_step": 16,
+      "teacher_scored_tokens": 6219,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.358032484849294,
+      "lr": 0.0003,
+      "grad_norm": 0.5553113222122192,
+      "overflow_skipped": false,
+      "elapsed_sec": 289.176888820999
+    },
+    {
+      "optimizer_step": 17,
+      "teacher_scored_tokens": 6592,
+      "step_tokens": 373,
+      "mean_kl_loss": 0.4341022092599332,
+      "lr": 0.0003,
+      "grad_norm": 0.8563938140869141,
+      "overflow_skipped": false,
+      "elapsed_sec": 306.5433904749989
+    },
+    {
+      "optimizer_step": 18,
+      "teacher_scored_tokens": 6982,
+      "step_tokens": 390,
+      "mean_kl_loss": 0.35459059736667536,
+      "lr": 0.0003,
+      "grad_norm": 0.5546548366546631,
+      "overflow_skipped": false,
+      "elapsed_sec": 324.66096132299936
+    },
+    {
+      "optimizer_step": 19,
+      "teacher_scored_tokens": 7366,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.3828449249267578,
+      "lr": 0.0003,
+      "grad_norm": 0.5970572829246521,
+      "overflow_skipped": false,
+      "elapsed_sec": 342.32554035499925
+    },
+    {
+      "optimizer_step": 20,
+      "teacher_scored_tokens": 7752,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.3882550896372202,
+      "lr": 0.0003,
+      "grad_norm": 0.7651657462120056,
+      "overflow_skipped": false,
+      "elapsed_sec": 360.2640325749999
+    },
+    {
+      "optimizer_step": 21,
+      "teacher_scored_tokens": 8168,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.35926709037560683,
+      "lr": 0.0003,
+      "grad_norm": 0.5983431935310364,
+      "overflow_skipped": false,
+      "elapsed_sec": 379.54371357799937
+    },
+    {
+      "optimizer_step": 22,
+      "teacher_scored_tokens": 8552,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.269074151913325,
+      "lr": 0.0003,
+      "grad_norm": 0.6290086507797241,
+      "overflow_skipped": false,
+      "elapsed_sec": 397.2317106970004
+    },
+    {
+      "optimizer_step": 23,
+      "teacher_scored_tokens": 8963,
+      "step_tokens": 411,
+      "mean_kl_loss": 0.2719831582693578,
+      "lr": 0.0003,
+      "grad_norm": 0.6204631924629211,
+      "overflow_skipped": false,
+      "elapsed_sec": 416.3641479729995
+    },
+    {
+      "optimizer_step": 24,
+      "teacher_scored_tokens": 9379,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.3902047047248253,
+      "lr": 0.0003,
+      "grad_norm": 0.6566745042800903,
+      "overflow_skipped": false,
+      "elapsed_sec": 435.7214986409999
+    },
+    {
+      "optimizer_step": 25,
+      "teacher_scored_tokens": 9763,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.35373910268147785,
+      "lr": 0.0003,
+      "grad_norm": 0.6958261132240295,
+      "overflow_skipped": false,
+      "elapsed_sec": 453.5012233380003
+    },
+    {
+      "optimizer_step": 26,
+      "teacher_scored_tokens": 10179,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.30016353955635655,
+      "lr": 0.0003,
+      "grad_norm": 0.5530574321746826,
+      "overflow_skipped": false,
+      "elapsed_sec": 472.81056237699886
+    },
+    {
+      "optimizer_step": 27,
+      "teacher_scored_tokens": 10595,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.30185741644639236,
+      "lr": 0.0003,
+      "grad_norm": 0.5114002823829651,
+      "overflow_skipped": false,
+      "elapsed_sec": 492.11500382600025
+    },
+    {
+      "optimizer_step": 28,
+      "teacher_scored_tokens": 10979,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.24654752016067505,
+      "lr": 0.0003,
+      "grad_norm": 0.5706104636192322,
+      "overflow_skipped": false,
+      "elapsed_sec": 509.81599101699976
+    },
+    {
+      "optimizer_step": 29,
+      "teacher_scored_tokens": 11395,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.28907590875258815,
+      "lr": 0.0003,
+      "grad_norm": 0.4813479483127594,
+      "overflow_skipped": false,
+      "elapsed_sec": 529.2853961000001
+    },
+    {
+      "optimizer_step": 30,
+      "teacher_scored_tokens": 11811,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.3801223406424889,
+      "lr": 0.0003,
+      "grad_norm": 0.6658098697662354,
+      "overflow_skipped": false,
+      "elapsed_sec": 548.7180148379994
+    },
+    {
+      "optimizer_step": 31,
+      "teacher_scored_tokens": 12195,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.30679882566134137,
+      "lr": 0.0003,
+      "grad_norm": 0.6317168474197388,
+      "overflow_skipped": false,
+      "elapsed_sec": 566.4861016639989
+    },
+    {
+      "optimizer_step": 32,
+      "teacher_scored_tokens": 12581,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.3123919963161099,
+      "lr": 0.0003,
+      "grad_norm": 0.5789543986320496,
+      "overflow_skipped": false,
+      "elapsed_sec": 584.4465517489989
+    },
+    {
+      "optimizer_step": 33,
+      "teacher_scored_tokens": 12967,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.1797845722924088,
+      "lr": 0.0003,
+      "grad_norm": 0.46846461296081543,
+      "overflow_skipped": false,
+      "elapsed_sec": 602.3522090079987
+    },
+    {
+      "optimizer_step": 34,
+      "teacher_scored_tokens": 13351,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.2935156325499217,
+      "lr": 0.0003,
+      "grad_norm": 0.5202206969261169,
+      "overflow_skipped": false,
+      "elapsed_sec": 620.0289335899997
+    },
+    {
+      "optimizer_step": 35,
+      "teacher_scored_tokens": 13737,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.31703087780142075,
+      "lr": 0.0003,
+      "grad_norm": 0.4642139971256256,
+      "overflow_skipped": false,
+      "elapsed_sec": 637.9432784809997
+    },
+    {
+      "optimizer_step": 36,
+      "teacher_scored_tokens": 14137,
+      "step_tokens": 400,
+      "mean_kl_loss": 0.3291958975791931,
+      "lr": 0.0003,
+      "grad_norm": 0.6646246910095215,
+      "overflow_skipped": false,
+      "elapsed_sec": 656.6290465660004
+    },
+    {
+      "optimizer_step": 37,
+      "teacher_scored_tokens": 14521,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.2072034850716591,
+      "lr": 0.0003,
+      "grad_norm": 0.4325405955314636,
+      "overflow_skipped": false,
+      "elapsed_sec": 674.3202512999997
+    },
+    {
+      "optimizer_step": 38,
+      "teacher_scored_tokens": 14785,
+      "step_tokens": 264,
+      "mean_kl_loss": 0.21099460486209753,
+      "lr": 0.0003,
+      "grad_norm": 0.6895231008529663,
+      "overflow_skipped": false,
+      "elapsed_sec": 686.9403096360002
+    },
+    {
+      "optimizer_step": 39,
+      "teacher_scored_tokens": 15183,
+      "step_tokens": 398,
+      "mean_kl_loss": 0.343445452912968,
+      "lr": 0.0003,
+      "grad_norm": 0.6321989297866821,
+      "overflow_skipped": false,
+      "elapsed_sec": 705.6346074020003
+    },
+    {
+      "optimizer_step": 40,
+      "teacher_scored_tokens": 15567,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.296220342318217,
+      "lr": 0.0003,
+      "grad_norm": 0.4542774260044098,
+      "overflow_skipped": false,
+      "elapsed_sec": 723.3053153379988
+    },
+    {
+      "optimizer_step": 41,
+      "teacher_scored_tokens": 15953,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.24813843309068617,
+      "lr": 0.0003,
+      "grad_norm": 0.4926162660121918,
+      "overflow_skipped": false,
+      "elapsed_sec": 741.0434652919994
+    },
+    {
+      "optimizer_step": 42,
+      "teacher_scored_tokens": 16347,
+      "step_tokens": 394,
+      "mean_kl_loss": 0.19400426457981168,
+      "lr": 0.0003,
+      "grad_norm": 0.47043177485466003,
+      "overflow_skipped": false,
+      "elapsed_sec": 759.6077419119993
+    },
+    {
+      "optimizer_step": 43,
+      "teacher_scored_tokens": 16731,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.3085111677646637,
+      "lr": 0.0003,
+      "grad_norm": 0.5475999712944031,
+      "overflow_skipped": false,
+      "elapsed_sec": 777.273500670999
+    },
+    {
+      "optimizer_step": 44,
+      "teacher_scored_tokens": 17044,
+      "step_tokens": 313,
+      "mean_kl_loss": 0.23370876781547223,
+      "lr": 0.0003,
+      "grad_norm": 0.5281988978385925,
+      "overflow_skipped": false,
+      "elapsed_sec": 791.8239926099996
+    },
+    {
+      "optimizer_step": 45,
+      "teacher_scored_tokens": 17411,
+      "step_tokens": 367,
+      "mean_kl_loss": 0.2251178787295435,
+      "lr": 0.0003,
+      "grad_norm": 0.5464486479759216,
+      "overflow_skipped": false,
+      "elapsed_sec": 808.8570517589997
+    },
+    {
+      "optimizer_step": 46,
+      "teacher_scored_tokens": 17795,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.1975983331600825,
+      "lr": 0.0003,
+      "grad_norm": 0.4524567425251007,
+      "overflow_skipped": false,
+      "elapsed_sec": 826.4484197689999
+    },
+    {
+      "optimizer_step": 47,
+      "teacher_scored_tokens": 18181,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.40843451151942806,
+      "lr": 0.0003,
+      "grad_norm": 0.9157845377922058,
+      "overflow_skipped": false,
+      "elapsed_sec": 844.2721288569992
+    },
+    {
+      "optimizer_step": 48,
+      "teacher_scored_tokens": 18504,
+      "step_tokens": 323,
+      "mean_kl_loss": 0.41885744455059987,
+      "lr": 0.0003,
+      "grad_norm": NaN,
+      "overflow_skipped": true,
+      "elapsed_sec": 859.3830696530003
+    },
+    {
+      "optimizer_step": 49,
+      "teacher_scored_tokens": 18874,
+      "step_tokens": 370,
+      "mean_kl_loss": 0.31286688108701965,
+      "lr": 0.0003,
+      "grad_norm": 0.49777692556381226,
+      "overflow_skipped": false,
+      "elapsed_sec": 876.4659708420004
+    },
+    {
+      "optimizer_step": 50,
+      "teacher_scored_tokens": 19290,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.3529796004295349,
+      "lr": 0.0003,
+      "grad_norm": 0.48756030201911926,
+      "overflow_skipped": false,
+      "elapsed_sec": 895.726634482
+    },
+    {
+      "optimizer_step": 51,
+      "teacher_scored_tokens": 19565,
+      "step_tokens": 275,
+      "mean_kl_loss": 0.30208737554875287,
+      "lr": 0.0003,
+      "grad_norm": 0.6507294178009033,
+      "overflow_skipped": false,
+      "elapsed_sec": 908.6561160349993
+    },
+    {
+      "optimizer_step": 52,
+      "teacher_scored_tokens": 19949,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.2453294297059377,
+      "lr": 0.0003,
+      "grad_norm": 0.5213500261306763,
+      "overflow_skipped": false,
+      "elapsed_sec": 926.3760397099995
+    },
+    {
+      "optimizer_step": 53,
+      "teacher_scored_tokens": 20365,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.287349664247953,
+      "lr": 0.0003,
+      "grad_norm": 0.5478290915489197,
+      "overflow_skipped": false,
+      "elapsed_sec": 945.5920061079996
+    },
+    {
+      "optimizer_step": 54,
+      "teacher_scored_tokens": 20763,
+      "step_tokens": 398,
+      "mean_kl_loss": 0.3966064548971665,
+      "lr": 0.0003,
+      "grad_norm": 0.7126060724258423,
+      "overflow_skipped": false,
+      "elapsed_sec": 963.9945998080002
+    },
+    {
+      "optimizer_step": 55,
+      "teacher_scored_tokens": 21147,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.29780301451683044,
+      "lr": 0.0003,
+      "grad_norm": 0.6026487350463867,
+      "overflow_skipped": false,
+      "elapsed_sec": 981.6769122429996
+    },
+    {
+      "optimizer_step": 56,
+      "teacher_scored_tokens": 21533,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.30953574579189785,
+      "lr": 0.0003,
+      "grad_norm": NaN,
+      "overflow_skipped": true,
+      "elapsed_sec": 999.4134345399998
+    },
+    {
+      "optimizer_step": 57,
+      "teacher_scored_tokens": 21919,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.3523555936417277,
+      "lr": 0.0003,
+      "grad_norm": 0.48945513367652893,
+      "overflow_skipped": false,
+      "elapsed_sec": 1017.3407681070003
+    },
+    {
+      "optimizer_step": 58,
+      "teacher_scored_tokens": 22303,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.1586331824461619,
+      "lr": 0.0003,
+      "grad_norm": 0.33802488446235657,
+      "overflow_skipped": false,
+      "elapsed_sec": 1034.901960441999
+    },
+    {
+      "optimizer_step": 59,
+      "teacher_scored_tokens": 22719,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.22182297248106736,
+      "lr": 0.0003,
+      "grad_norm": 0.45786210894584656,
+      "overflow_skipped": false,
+      "elapsed_sec": 1054.488346917
+    },
+    {
+      "optimizer_step": 60,
+      "teacher_scored_tokens": 23135,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.36435888363764835,
+      "lr": 0.0003,
+      "grad_norm": 0.5285267233848572,
+      "overflow_skipped": false,
+      "elapsed_sec": 1073.8810002359987
+    },
+    {
+      "optimizer_step": 61,
+      "teacher_scored_tokens": 23519,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.44528202215830487,
+      "lr": 0.0003,
+      "grad_norm": 0.5544877052307129,
+      "overflow_skipped": false,
+      "elapsed_sec": 1091.6618043889994
+    },
+    {
+      "optimizer_step": 62,
+      "teacher_scored_tokens": 23906,
+      "step_tokens": 387,
+      "mean_kl_loss": 0.32162234087015,
+      "lr": 0.0003,
+      "grad_norm": 0.6055530309677124,
+      "overflow_skipped": false,
+      "elapsed_sec": 1109.6958320269987
+    },
+    {
+      "optimizer_step": 63,
+      "teacher_scored_tokens": 24309,
+      "step_tokens": 403,
+      "mean_kl_loss": 0.35005864937311365,
+      "lr": 0.0003,
+      "grad_norm": 0.5914601683616638,
+      "overflow_skipped": false,
+      "elapsed_sec": 1128.6007012549999
+    },
+    {
+      "optimizer_step": 64,
+      "teacher_scored_tokens": 24693,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.2192288637161255,
+      "lr": 0.0003,
+      "grad_norm": 0.4223130941390991,
+      "overflow_skipped": false,
+      "elapsed_sec": 1146.3504034729995
+    },
+    {
+      "optimizer_step": 65,
+      "teacher_scored_tokens": 25109,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.29404207605582017,
+      "lr": 0.0003,
+      "grad_norm": 0.5292317867279053,
+      "overflow_skipped": false,
+      "elapsed_sec": 1165.8405952189987
+    },
+    {
+      "optimizer_step": 66,
+      "teacher_scored_tokens": 25495,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.34768019911442244,
+      "lr": 0.0003,
+      "grad_norm": 0.5449109673500061,
+      "overflow_skipped": false,
+      "elapsed_sec": 1183.988458979
+    },
+    {
+      "optimizer_step": 67,
+      "teacher_scored_tokens": 25879,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.3408509095509847,
+      "lr": 0.0003,
+      "grad_norm": 0.5275714993476868,
+      "overflow_skipped": false,
+      "elapsed_sec": 1201.7362088909995
+    },
+    {
+      "optimizer_step": 68,
+      "teacher_scored_tokens": 26276,
+      "step_tokens": 397,
+      "mean_kl_loss": 0.4170689904119266,
+      "lr": 0.0003,
+      "grad_norm": 0.6053668260574341,
+      "overflow_skipped": false,
+      "elapsed_sec": 1220.2177885789988
+    },
+    {
+      "optimizer_step": 69,
+      "teacher_scored_tokens": 26692,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.288911997125699,
+      "lr": 0.0003,
+      "grad_norm": 0.4744100272655487,
+      "overflow_skipped": false,
+      "elapsed_sec": 1239.579865456999
+    },
+    {
+      "optimizer_step": 70,
+      "teacher_scored_tokens": 27076,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.33048449953397113,
+      "lr": 0.0003,
+      "grad_norm": 0.4790474474430084,
+      "overflow_skipped": false,
+      "elapsed_sec": 1257.398358766999
+    },
+    {
+      "optimizer_step": 71,
+      "teacher_scored_tokens": 27492,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.2224857096488659,
+      "lr": 0.0003,
+      "grad_norm": 0.39561256766319275,
+      "overflow_skipped": false,
+      "elapsed_sec": 1276.7723358860003
+    },
+    {
+      "optimizer_step": 72,
+      "teacher_scored_tokens": 27878,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.2540208836293591,
+      "lr": 0.0003,
+      "grad_norm": 0.5892718434333801,
+      "overflow_skipped": false,
+      "elapsed_sec": 1294.7948159999996
+    },
+    {
+      "optimizer_step": 73,
+      "teacher_scored_tokens": 28262,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.2682834168275197,
+      "lr": 0.0003,
+      "grad_norm": 0.5602222084999084,
+      "overflow_skipped": false,
+      "elapsed_sec": 1312.5470848389996
+    },
+    {
+      "optimizer_step": 74,
+      "teacher_scored_tokens": 28678,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.4205170227931096,
+      "lr": 0.0003,
+      "grad_norm": 0.5619106888771057,
+      "overflow_skipped": false,
+      "elapsed_sec": 1331.810402788
+    },
+    {
+      "optimizer_step": 75,
+      "teacher_scored_tokens": 29094,
+      "step_tokens": 416,
+      "mean_kl_loss": 0.36261620888343227,
+      "lr": 0.0003,
+      "grad_norm": 0.5384738445281982,
+      "overflow_skipped": false,
+      "elapsed_sec": 1351.3015955739993
+    },
+    {
+      "optimizer_step": 76,
+      "teacher_scored_tokens": 29478,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.2998187839984894,
+      "lr": 0.0003,
+      "grad_norm": 0.4913104176521301,
+      "overflow_skipped": false,
+      "elapsed_sec": 1369.15087648
+    },
+    {
+      "optimizer_step": 77,
+      "teacher_scored_tokens": 29864,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.3756755581077362,
+      "lr": 0.0003,
+      "grad_norm": 0.568366289138794,
+      "overflow_skipped": false,
+      "elapsed_sec": 1387.0788750299998
+    },
+    {
+      "optimizer_step": 78,
+      "teacher_scored_tokens": 30250,
+      "step_tokens": 386,
+      "mean_kl_loss": 0.2301822573313287,
+      "lr": 0.0003,
+      "grad_norm": 0.4682445526123047,
+      "overflow_skipped": false,
+      "elapsed_sec": 1405.0950810189988
+    },
+    {
+      "optimizer_step": 79,
+      "teacher_scored_tokens": 30634,
+      "step_tokens": 384,
+      "mean_kl_loss": 0.26987119515736896,
+      "lr": 0.0003,
+      "grad_norm": 0.43215543031692505,
+      "overflow_skipped": false,
+      "elapsed_sec": 1422.840118537999
+    },
+    {
+      "optimizer_step": 80,
+      "teacher_scored_tokens": 30903,
+      "step_tokens": 269,
+      "mean_kl_loss": 0.30009399648049506,
+      "lr": 0.0003,
+      "grad_norm": 0.844426155090332,
+      "overflow_skipped": false,
+      "elapsed_sec": 1442.2801389380002
+    },
+    {
+      "optimizer_step": 81,
+      "teacher_scored_tokens": 31174,
+      "step_tokens": 271,
+      "mean_kl_loss": 0.34767297571490613,
+      "lr": 0.0003,
+      "grad_norm": 0.678613007068634,
+      "overflow_skipped": false,
+      "elapsed_sec": 1456.5166235519991
+    },
+    {
+      "optimizer_step": 82,
+      "teacher_scored_tokens": 31457,
+      "step_tokens": 283,
+      "mean_kl_loss": 0.42284618330257207,
+      "lr": 0.0003,
+      "grad_norm": 0.8907256722450256,
+      "overflow_skipped": false,
+      "elapsed_sec": 1472.0688962189997
+    },
+    {
+      "optimizer_step": 83,
+      "teacher_scored_tokens": 31730,
+      "step_tokens": 273,
+      "mean_kl_loss": 0.40199262877046077,
+      "lr": 0.0003,
+      "grad_norm": 0.84111487865448,
+      "overflow_skipped": false,
+      "elapsed_sec": 1486.8775239379993
+    },
+    {
+      "optimizer_step": 84,
+      "teacher_scored_tokens": 32000,
+      "step_tokens": 270,
+      "mean_kl_loss": 0.37618226946366057,
+      "lr": 0.0003,
+      "grad_norm": 0.7220624685287476,
+      "overflow_skipped": false,
+      "elapsed_sec": 1501.9490955719994
+    },
+    {
+      "optimizer_step": 85,
+      "teacher_scored_tokens": 32261,
+      "step_tokens": 261,
+      "mean_kl_loss": 0.38969474549894134,
+      "lr": 0.0003,
+      "grad_norm": 1.2018450498580933,
+      "overflow_skipped": false,
+      "elapsed_sec": 1516.7791418889992
+    },
+    {
+      "optimizer_step": 86,
+      "teacher_scored_tokens": 32523,
+      "step_tokens": 262,
+      "mean_kl_loss": 0.37355963006359705,
+      "lr": 0.0003,
+      "grad_norm": 0.7823229432106018,
+      "overflow_skipped": false,
+      "elapsed_sec": 1530.8384945479993
+    },
+    {
+      "optimizer_step": 87,
+      "teacher_scored_tokens": 32796,
+      "step_tokens": 273,
+      "mean_kl_loss": 0.3393500599969219,
+      "lr": 0.0003,
+      "grad_norm": 0.6145523190498352,
+      "overflow_skipped": false,
+      "elapsed_sec": 1546.0498623539988
+    },
+    {
+      "optimizer_step": 88,
+      "teacher_scored_tokens": 33083,
+      "step_tokens": 287,
+      "mean_kl_loss": 0.2941760723754919,
+      "lr": 0.0003,
+      "grad_norm": 0.5741803646087646,
+      "overflow_skipped": false,
+      "elapsed_sec": 1562.4531021579987
+    },
+    {
+      "optimizer_step": 89,
+      "teacher_scored_tokens": 33368,
+      "step_tokens": 285,
+      "mean_kl_loss": 0.3028448461048436,
+      "lr": 0.0003,
+      "grad_norm": 0.6467475891113281,
+      "overflow_skipped": false,
+      "elapsed_sec": 1579.053520653999
+    },
+    {
+      "optimizer_step": 90,
+      "teacher_scored_tokens": 33625,
+      "step_tokens": 257,
+      "mean_kl_loss": 0.3706449208317274,
+      "lr": 0.0003,
+      "grad_norm": 0.8634157180786133,
+      "overflow_skipped": false,
+      "elapsed_sec": 1593.2958783819995
+    },
+    {
+      "optimizer_step": 91,
+      "teacher_scored_tokens": 33909,
+      "step_tokens": 284,
+      "mean_kl_loss": 0.33726515115933936,
+      "lr": 0.0003,
+      "grad_norm": 0.6572949886322021,
+      "overflow_skipped": false,
+      "elapsed_sec": 1608.567270816
+    },
+    {
+      "optimizer_step": 92,
+      "teacher_scored_tokens": 34166,
+      "step_tokens": 257,
+      "mean_kl_loss": 0.2578731902624962,
+      "lr": 0.0003,
+      "grad_norm": 0.7031024098396301,
+      "overflow_skipped": false,
+      "elapsed_sec": 1622.5115430810001
+    },
+    {
+      "optimizer_step": 93,
+      "teacher_scored_tokens": 34443,
+      "step_tokens": 277,
+      "mean_kl_loss": 0.3622425187829653,
+      "lr": 0.0003,
+      "grad_norm": 0.8063182234764099,
+      "overflow_skipped": false,
+      "elapsed_sec": 1637.4711971069992
+    },
+    {
+      "optimizer_step": 94,
+      "teacher_scored_tokens": 34720,
+      "step_tokens": 277,
+      "mean_kl_loss": 0.3788568812896521,
+      "lr": 0.0003,
+      "grad_norm": 0.8703082203865051,
+      "overflow_skipped": false,
+      "elapsed_sec": 1652.2822787179994
+    },
+    {
+      "optimizer_step": 95,
+      "teacher_scored_tokens": 35002,
+      "step_tokens": 282,
+      "mean_kl_loss": 0.289478918563918,
+      "lr": 0.0003,
+      "grad_norm": 0.7475013732910156,
+      "overflow_skipped": false,
+      "elapsed_sec": 1667.665692425
+    },
+    {
+      "optimizer_step": 96,
+      "teacher_scored_tokens": 35275,
+      "step_tokens": 273,
+      "mean_kl_loss": 0.31906934288900085,
+      "lr": 0.0003,
+      "grad_norm": 0.7293042540550232,
+      "overflow_skipped": false,
+      "elapsed_sec": 1683.2645590079992
+    },
+    {
+      "optimizer_step": 97,
+      "teacher_scored_tokens": 35552,
+      "step_tokens": 277,
+      "mean_kl_loss": 0.2928360030021424,
+      "lr": 0.0003,
+      "grad_norm": 0.8321412205696106,
+      "overflow_skipped": false,
+      "elapsed_sec": 1698.1650688129994
+    },
+    {
+      "optimizer_step": 98,
+      "teacher_scored_tokens": 35814,
+      "step_tokens": 262,
+      "mean_kl_loss": 0.23440815764657072,
+      "lr": 0.0003,
+      "grad_norm": 0.7619343996047974,
+      "overflow_skipped": false,
+      "elapsed_sec": 1712.6167987879999
+    },
+    {
+      "optimizer_step": 99,
+      "teacher_scored_tokens": 36083,
+      "step_tokens": 269,
+      "mean_kl_loss": 0.3103335683466001,
+      "lr": 0.0003,
+      "grad_norm": 0.7061660289764404,
+      "overflow_skipped": false,
+      "elapsed_sec": 1727.4813753540002
+    },
+    {
+      "optimizer_step": 100,
+      "teacher_scored_tokens": 36349,
+      "step_tokens": 266,
+      "mean_kl_loss": 0.24899649181354203,
+      "lr": 0.0003,
+      "grad_norm": 0.5709283947944641,
+      "overflow_skipped": false,
+      "elapsed_sec": 1742.0709773649996
+    },
+    {
+      "optimizer_step": 101,
+      "teacher_scored_tokens": 36619,
+      "step_tokens": 270,
+      "mean_kl_loss": 0.26052868295529924,
+      "lr": 0.0003,
+      "grad_norm": 0.6682760119438171,
+      "overflow_skipped": false,
+      "elapsed_sec": 1757.328346897999
+    },
+    {
+      "optimizer_step": 102,
+      "teacher_scored_tokens": 36878,
+      "step_tokens": 259,
+      "mean_kl_loss": 0.27587110680459664,
+      "lr": 0.0003,
+      "grad_norm": 0.605065643787384,
+      "overflow_skipped": false,
+      "elapsed_sec": 1771.5829612420002
+    },
+    {
+      "optimizer_step": 103,
+      "teacher_scored_tokens": 37143,
+      "step_tokens": 265,
+      "mean_kl_loss": 0.28464923770922534,
+      "lr": 0.0003,
+      "grad_norm": 0.7092036604881287,
+      "overflow_skipped": false,
+      "elapsed_sec": 1786.2409650289992
+    },
+    {
+      "optimizer_step": 104,
+      "teacher_scored_tokens": 37401,
+      "step_tokens": 258,
+      "mean_kl_loss": 0.2798817512117211,
+      "lr": 0.0003,
+      "grad_norm": 0.6591513156890869,
+      "overflow_skipped": false,
+      "elapsed_sec": 1800.916992376
+    },
+    {
+      "optimizer_step": 105,
+      "teacher_scored_tokens": 37682,
+      "step_tokens": 281,
+      "mean_kl_loss": 0.2818312024651261,
+      "lr": 0.0003,
+      "grad_norm": 0.6889342069625854,
+      "overflow_skipped": false,
+      "elapsed_sec": 1816.7326228889997
+    },
+    {
+      "optimizer_step": 106,
+      "teacher_scored_tokens": 37938,
+      "step_tokens": 256,
+      "mean_kl_loss": 0.3116847926648916,
+      "lr": 0.0003,
+      "grad_norm": 0.682435929775238,
+      "overflow_skipped": false,
+      "elapsed_sec": 1830.9858790399994
+    },
+    {
+      "optimizer_step": 107,
+      "teacher_scored_tokens": 38218,
+      "step_tokens": 280,
+      "mean_kl_loss": 0.2857240304982822,
+      "lr": 0.0003,
+      "grad_norm": 0.589479386806488,
+      "overflow_skipped": false,
+      "elapsed_sec": 1847.1918289289988
+    },
+    {
+      "optimizer_step": 108,
+      "teacher_scored_tokens": 38484,
+      "step_tokens": 266,
+      "mean_kl_loss": 0.24084038738707514,
+      "lr": 0.0003,
+      "grad_norm": 0.5408884286880493,
+      "overflow_skipped": false,
+      "elapsed_sec": 1861.8862503049986
+    },
+    {
+      "optimizer_step": 109,
+      "teacher_scored_tokens": 38746,
+      "step_tokens": 262,
+      "mean_kl_loss": 0.2733439135432727,
+      "lr": 0.0003,
+      "grad_norm": 0.7026153206825256,
+      "overflow_skipped": false,
+      "elapsed_sec": 1876.013635145
+    },
+    {
+      "optimizer_step": 110,
+      "teacher_scored_tokens": 39021,
+      "step_tokens": 275,
+      "mean_kl_loss": 0.23212996826422486,
+      "lr": 0.0003,
+      "grad_norm": 0.600452184677124,
+      "overflow_skipped": false,
+      "elapsed_sec": 1891.969416087999
+    },
+    {
+      "optimizer_step": 111,
+      "teacher_scored_tokens": 39285,
+      "step_tokens": 264,
+      "mean_kl_loss": 0.22914818023282074,
+      "lr": 0.0003,
+      "grad_norm": 0.7253484129905701,
+      "overflow_skipped": false,
+      "elapsed_sec": 1907.0619892609993
+    },
+    {
+      "optimizer_step": 112,
+      "teacher_scored_tokens": 39568,
+      "step_tokens": 283,
+      "mean_kl_loss": 0.31064639356507273,
+      "lr": 0.0003,
+      "grad_norm": 0.6711321473121643,
+      "overflow_skipped": false,
+      "elapsed_sec": 1922.1540301719997
+    },
+    {
+      "optimizer_step": 113,
+      "teacher_scored_tokens": 39854,
+      "step_tokens": 286,
+      "mean_kl_loss": 0.20099155613957168,
+      "lr": 0.0003,
+      "grad_norm": 0.5057241916656494,
+      "overflow_skipped": false,
+      "elapsed_sec": 1937.7269033269986
+    },
+    {
+      "optimizer_step": 114,
+      "teacher_scored_tokens": 40000,
+      "step_tokens": 146,
+      "mean_kl_loss": 0.2642071645528282,
+      "lr": 0.0003,
+      "grad_norm": 0.9334005117416382,
+      "overflow_skipped": false,
+      "elapsed_sec": 1946.1394589989995
+    }
+  ]
+}

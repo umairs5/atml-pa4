@@ -498,3 +498,4 @@ def benchmark_part_b_inference_sweep(
         if dev.type == "cuda":
             torch.cuda.empty_cache()
     return results
+

@@ -1,0 +1,128 @@
+[
+  {
+    "case_id": "KV-2048-start-0-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.09765625,
+    "q_logits_mean_abs_diff": 0.006686439737677574,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-2048-start-2-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.11328125,
+    "q_logits_mean_abs_diff": 0.007037687581032515,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-2048-start-8-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.111328125,
+    "q_logits_mean_abs_diff": 0.007555076852440834,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-2048-middle-0-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.1171875,
+    "q_logits_mean_abs_diff": 0.0067270677536726,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-2048-middle-2-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.10205078125,
+    "q_logits_mean_abs_diff": 0.007058162707835436,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-2048-middle-8-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.1015625,
+    "q_logits_mean_abs_diff": 0.007325713988393545,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-2048-end-0-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.109375,
+    "q_logits_mean_abs_diff": 0.007414672058075666,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-2048-end-2-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.1435546875,
+    "q_logits_mean_abs_diff": 0.006803461816161871,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-2048-end-8-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.125,
+    "q_logits_mean_abs_diff": 0.0073754554614424706,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-4096-start-0-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.22265625,
+    "q_logits_mean_abs_diff": 0.008722315542399883,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-4096-start-2-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.146484375,
+    "q_logits_mean_abs_diff": 0.0073488024063408375,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-4096-start-8-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.0904541015625,
+    "q_logits_mean_abs_diff": 0.007200163323432207,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-4096-middle-0-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.125,
+    "q_logits_mean_abs_diff": 0.008757144212722778,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-4096-middle-2-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.25,
+    "q_logits_mean_abs_diff": 0.008663931861519814,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-4096-middle-8-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.150390625,
+    "q_logits_mean_abs_diff": 0.008450327441096306,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-4096-end-0-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.25,
+    "q_logits_mean_abs_diff": 0.008345506154000759,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-4096-end-2-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.234375,
+    "q_logits_mean_abs_diff": 0.008291198872029781,
+    "top1_match_last": true
+  },
+  {
+    "case_id": "KV-4096-end-8-00",
+    "all_finite": true,
+    "q_logits_max_abs_diff": 0.11328125,
+    "q_logits_mean_abs_diff": 0.007596679497510195,
+    "top1_match_last": true
+  }
+]

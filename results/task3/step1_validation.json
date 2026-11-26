@@ -1,0 +1,193 @@
+{
+  "tokenizer_and_chat_template_agree": true,
+  "markov_chi2": {
+    "n_trials": 100000,
+    "gamma": 2,
+    "min_expected_count": 899.9999999999999,
+    "correct_sampler": {
+      "chi2": 23.343342739079173,
+      "pvalue": 0.6134585847694416,
+      "passed_p_ge_0_01": true,
+      "n_trials": 100000,
+      "accepted_over_proposed": 0.6485954843660495,
+      "total_bonus": 54992
+    },
+    "broken_residual_negative_control": {
+      "chi2": 13306.40427130887,
+      "pvalue": 0.0,
+      "rejected_p_lt_0_01": true,
+      "n_trials": 100000,
+      "accepted_over_proposed": 0.6554924043717824,
+      "total_bonus": 55282
+    },
+    "joint_sequence_table": [
+      {
+        "seq": "000",
+        "expected_prob": 0.15125000000000002,
+        "correct_empirical_prob": 0.1517,
+        "broken_empirical_prob": 0.07277
+      },
+      {
+        "seq": "001",
+        "expected_prob": 0.0825,
+        "correct_empirical_prob": 0.08141,
+        "broken_empirical_prob": 0.05448
+      },
+      {
+        "seq": "002",
+        "expected_prob": 0.04125,
+        "correct_empirical_prob": 0.04148,
+        "broken_empirical_prob": 0.02828
+      },
+      {
+        "seq": "010",
+        "expected_prob": 0.03,
+        "correct_empirical_prob": 0.02935,
+        "broken_empirical_prob": 0.03219
+      },
+      {
+        "seq": "011",
+        "expected_prob": 0.075,
+        "correct_empirical_prob": 0.07639,
+        "broken_empirical_prob": 0.0651
+      },
+      {
+        "seq": "012",
+        "expected_prob": 0.045,
+        "correct_empirical_prob": 0.04471,
+        "broken_empirical_prob": 0.04986
+      },
+      {
+        "seq": "020",
+        "expected_prob": 0.02625,
+        "correct_empirical_prob": 0.02677,
+        "broken_empirical_prob": 0.0231
+      },
+      {
+        "seq": "021",
+        "expected_prob": 0.01875,
+        "correct_empirical_prob": 0.01842,
+        "broken_empirical_prob": 0.02076
+      },
+      {
+        "seq": "022",
+        "expected_prob": 0.03,
+        "correct_empirical_prob": 0.031,
+        "broken_empirical_prob": 0.02977
+      },
+      {
+        "seq": "100",
+        "expected_prob": 0.033,
+        "correct_empirical_prob": 0.03377,
+        "broken_empirical_prob": 0.0479
+      },
+      {
+        "seq": "101",
+        "expected_prob": 0.018,
+        "correct_empirical_prob": 0.01794,
+        "broken_empirical_prob": 0.03073
+      },
+      {
+        "seq": "102",
+        "expected_prob": 0.009,
+        "correct_empirical_prob": 0.00888,
+        "broken_empirical_prob": 0.01617
+      },
+      {
+        "seq": "110",
+        "expected_prob": 0.03,
+        "correct_empirical_prob": 0.02988,
+        "broken_empirical_prob": 0.03084
+      },
+      {
+        "seq": "111",
+        "expected_prob": 0.075,
+        "correct_empirical_prob": 0.07423,
+        "broken_empirical_prob": 0.06206
+      },
+      {
+        "seq": "112",
+        "expected_prob": 0.045,
+        "correct_empirical_prob": 0.04542,
+        "broken_empirical_prob": 0.04709
+      },
+      {
+        "seq": "120",
+        "expected_prob": 0.0315,
+        "correct_empirical_prob": 0.03207,
+        "broken_empirical_prob": 0.04771
+      },
+      {
+        "seq": "121",
+        "expected_prob": 0.0225,
+        "correct_empirical_prob": 0.0223,
+        "broken_empirical_prob": 0.0385
+      },
+      {
+        "seq": "122",
+        "expected_prob": 0.036,
+        "correct_empirical_prob": 0.03642,
+        "broken_empirical_prob": 0.05721
+      },
+      {
+        "seq": "200",
+        "expected_prob": 0.0385,
+        "correct_empirical_prob": 0.03831,
+        "broken_empirical_prob": 0.03519
+      },
+      {
+        "seq": "201",
+        "expected_prob": 0.020999999999999998,
+        "correct_empirical_prob": 0.02093,
+        "broken_empirical_prob": 0.02389
+      },
+      {
+        "seq": "202",
+        "expected_prob": 0.010499999999999999,
+        "correct_empirical_prob": 0.01096,
+        "broken_empirical_prob": 0.01228
+      },
+      {
+        "seq": "210",
+        "expected_prob": 0.010000000000000002,
+        "correct_empirical_prob": 0.00981,
+        "broken_empirical_prob": 0.01654
+      },
+      {
+        "seq": "211",
+        "expected_prob": 0.025,
+        "correct_empirical_prob": 0.02432,
+        "broken_empirical_prob": 0.03425
+      },
+      {
+        "seq": "212",
+        "expected_prob": 0.015,
+        "correct_empirical_prob": 0.01504,
+        "broken_empirical_prob": 0.02535
+      },
+      {
+        "seq": "220",
+        "expected_prob": 0.028000000000000004,
+        "correct_empirical_prob": 0.02744,
+        "broken_empirical_prob": 0.03243
+      },
+      {
+        "seq": "221",
+        "expected_prob": 0.020000000000000004,
+        "correct_empirical_prob": 0.01941,
+        "broken_empirical_prob": 0.02628
+      },
+      {
+        "seq": "222",
+        "expected_prob": 0.03200000000000001,
+        "correct_empirical_prob": 0.03164,
+        "broken_empirical_prob": 0.03927
+      }
+    ]
+  },
+  "self_speculative_acc_over_examined": 1.0,
+  "real_model_cache_len_consistent": true,
+  "real_model_cache_logit_max_abs_diff": 0.03369140625,
+  "real_model_spec_n_gen": 16,
+  "direct_logits_finite": true
+}

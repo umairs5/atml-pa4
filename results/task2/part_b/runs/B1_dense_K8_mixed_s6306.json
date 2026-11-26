@@ -1,0 +1,436 @@
+{
+  "run_id": "B1_dense_K8_mixed_s6306",
+  "group": "B1",
+  "mechanism": "dense",
+  "train_k": 8,
+  "train_regime": "mixed",
+  "seed": 6306,
+  "trainable_params": 436736,
+  "train_time_sec": 50.658879616000036,
+  "learning_curve": [
+    {
+      "step": 500,
+      "train_loss": 2.9409570693969727,
+      "dev_loss": 2.954519510269165,
+      "dev_acc": 0.123046875,
+      "by_cell": {
+        "K8_far": {
+          "acc": 0.12451171875,
+          "correct": 255,
+          "count": 2048
+        },
+        "K8_mixed": {
+          "acc": 0.12744140625,
+          "correct": 261,
+          "count": 2048
+        },
+        "K8_near": {
+          "acc": 0.1171875,
+          "correct": 240,
+          "count": 2048
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 0.12449392712550607,
+          "correct": 123,
+          "count": 988
+        },
+        "[32,64)": {
+          "acc": 0.11000662690523526,
+          "correct": 166,
+          "count": 1509
+        },
+        "[64,128)": {
+          "acc": 0.14625228519195613,
+          "correct": 80,
+          "count": 547
+        },
+        "[128,256)": {
+          "acc": 0.12483870967741935,
+          "correct": 387,
+          "count": 3100
+        }
+      },
+      "elapsed_sec": 5.660663261999957
+    },
+    {
+      "step": 1000,
+      "train_loss": 0.03649487346410751,
+      "dev_loss": 0.03181167940298716,
+      "dev_acc": 0.99658203125,
+      "by_cell": {
+        "K8_far": {
+          "acc": 0.99560546875,
+          "correct": 2039,
+          "count": 2048
+        },
+        "K8_mixed": {
+          "acc": 0.99658203125,
+          "correct": 2041,
+          "count": 2048
+        },
+        "K8_near": {
+          "acc": 0.99755859375,
+          "correct": 2043,
+          "count": 2048
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 0.9979757085020243,
+          "correct": 986,
+          "count": 988
+        },
+        "[32,64)": {
+          "acc": 0.9973492379058979,
+          "correct": 1505,
+          "count": 1509
+        },
+        "[64,128)": {
+          "acc": 0.9963436928702011,
+          "correct": 545,
+          "count": 547
+        },
+        "[128,256)": {
+          "acc": 0.9958064516129033,
+          "correct": 3087,
+          "count": 3100
+        }
+      },
+      "elapsed_sec": 11.329626418999965
+    },
+    {
+      "step": 1500,
+      "train_loss": 0.0022337702102959156,
+      "dev_loss": 0.0048418261188392835,
+      "dev_acc": 0.9990234375,
+      "by_cell": {
+        "K8_far": {
+          "acc": 0.99853515625,
+          "correct": 2045,
+          "count": 2048
+        },
+        "K8_mixed": {
+          "acc": 1.0,
+          "correct": 2048,
+          "count": 2048
+        },
+        "K8_near": {
+          "acc": 0.99853515625,
+          "correct": 2045,
+          "count": 2048
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 0.9989878542510121,
+          "correct": 987,
+          "count": 988
+        },
+        "[32,64)": {
+          "acc": 0.998674618952949,
+          "correct": 1507,
+          "count": 1509
+        },
+        "[64,128)": {
+          "acc": 1.0,
+          "correct": 547,
+          "count": 547
+        },
+        "[128,256)": {
+          "acc": 0.9990322580645161,
+          "correct": 3097,
+          "count": 3100
+        }
+      },
+      "elapsed_sec": 17.003673784999933
+    },
+    {
+      "step": 2000,
+      "train_loss": 0.001398940570652485,
+      "dev_loss": 0.0019784130854532123,
+      "dev_acc": 1.0,
+      "by_cell": {
+        "K8_far": {
+          "acc": 1.0,
+          "correct": 2048,
+          "count": 2048
+        },
+        "K8_mixed": {
+          "acc": 1.0,
+          "correct": 2048,
+          "count": 2048
+        },
+        "K8_near": {
+          "acc": 1.0,
+          "correct": 2048,
+          "count": 2048
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 1.0,
+          "correct": 988,
+          "count": 988
+        },
+        "[32,64)": {
+          "acc": 1.0,
+          "correct": 1509,
+          "count": 1509
+        },
+        "[64,128)": {
+          "acc": 1.0,
+          "correct": 547,
+          "count": 547
+        },
+        "[128,256)": {
+          "acc": 1.0,
+          "correct": 3100,
+          "count": 3100
+        }
+      },
+      "elapsed_sec": 22.680282038999962
+    },
+    {
+      "step": 3000,
+      "train_loss": 0.0006033078534528613,
+      "dev_loss": 0.0007940991878664742,
+      "dev_acc": 1.0,
+      "by_cell": {
+        "K8_far": {
+          "acc": 1.0,
+          "correct": 2048,
+          "count": 2048
+        },
+        "K8_mixed": {
+          "acc": 1.0,
+          "correct": 2048,
+          "count": 2048
+        },
+        "K8_near": {
+          "acc": 1.0,
+          "correct": 2048,
+          "count": 2048
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 1.0,
+          "correct": 988,
+          "count": 988
+        },
+        "[32,64)": {
+          "acc": 1.0,
+          "correct": 1509,
+          "count": 1509
+        },
+        "[64,128)": {
+          "acc": 1.0,
+          "correct": 547,
+          "count": 547
+        },
+        "[128,256)": {
+          "acc": 1.0,
+          "correct": 3100,
+          "count": 3100
+        }
+      },
+      "elapsed_sec": 33.898807376000036
+    },
+    {
+      "step": 4500,
+      "train_loss": 0.00028685241704806685,
+      "dev_loss": 0.00030931481160223484,
+      "dev_acc": 1.0,
+      "by_cell": {
+        "K8_far": {
+          "acc": 1.0,
+          "correct": 2048,
+          "count": 2048
+        },
+        "K8_mixed": {
+          "acc": 1.0,
+          "correct": 2048,
+          "count": 2048
+        },
+        "K8_near": {
+          "acc": 1.0,
+          "correct": 2048,
+          "count": 2048
+        }
+      },
+      "by_distance_bin": {
+        "[0,32)": {
+          "acc": 1.0,
+          "correct": 988,
+          "count": 988
+        },
+        "[32,64)": {
+          "acc": 1.0,
+          "correct": 1509,
+          "count": 1509
+        },
+        "[64,128)": {
+          "acc": 1.0,
+          "correct": 547,
+          "count": 547
+        },
+        "[128,256)": {
+          "acc": 1.0,
+          "correct": 3100,
+          "count": 3100
+        }
+      },
+      "elapsed_sec": 50.658729978999986
+    }
+  ],
+  "test_eval": {
+    "accuracy": 0.7232607886904762,
+    "loss": 2.643258354772808,
+    "total_queries": 86016,
+    "by_cell": {
+      "K4_far": {
+        "acc": 1.0,
+        "correct": 4096,
+        "count": 4096
+      },
+      "K4_mixed": {
+        "acc": 1.0,
+        "correct": 4096,
+        "count": 4096
+      },
+      "K4_near": {
+        "acc": 1.0,
+        "correct": 4096,
+        "count": 4096
+      },
+      "K8_far": {
+        "acc": 1.0,
+        "correct": 8192,
+        "count": 8192
+      },
+      "K8_mixed": {
+        "acc": 1.0,
+        "correct": 8192,
+        "count": 8192
+      },
+      "K8_near": {
+        "acc": 1.0,
+        "correct": 8192,
+        "count": 8192
+      },
+      "K16_far": {
+        "acc": 0.51519775390625,
+        "correct": 8441,
+        "count": 16384
+      },
+      "K16_mixed": {
+        "acc": 0.5159912109375,
+        "correct": 8454,
+        "count": 16384
+      },
+      "K16_near": {
+        "acc": 0.51593017578125,
+        "correct": 8453,
+        "count": 16384
+      }
+    },
+    "by_distance_bin": {
+      "[0,32)": {
+        "acc": 0.6724711907810499,
+        "correct": 7878,
+        "count": 11715
+      },
+      "[32,64)": {
+        "acc": 0.7401948107921731,
+        "correct": 17174,
+        "count": 23202
+      },
+      "[64,128)": {
+        "acc": 0.7182870658533549,
+        "correct": 5770,
+        "count": 8033
+      },
+      "[128,256)": {
+        "acc": 0.7288812520317652,
+        "correct": 31390,
+        "count": 43066
+      }
+    }
+  },
+  "test_eval_w64_mask_control": {
+    "accuracy": 0.30610584077380953,
+    "loss": 5.733680109128251,
+    "total_queries": 86016,
+    "by_cell": {
+      "K4_far": {
+        "acc": 0.015869140625,
+        "correct": 65,
+        "count": 4096
+      },
+      "K4_mixed": {
+        "acc": 0.26025390625,
+        "correct": 1066,
+        "count": 4096
+      },
+      "K4_near": {
+        "acc": 1.0,
+        "correct": 4096,
+        "count": 4096
+      },
+      "K8_far": {
+        "acc": 0.0162353515625,
+        "correct": 133,
+        "count": 8192
+      },
+      "K8_mixed": {
+        "acc": 0.2415771484375,
+        "correct": 1979,
+        "count": 8192
+      },
+      "K8_near": {
+        "acc": 1.0,
+        "correct": 8192,
+        "count": 8192
+      },
+      "K16_far": {
+        "acc": 0.01483154296875,
+        "correct": 243,
+        "count": 16384
+      },
+      "K16_mixed": {
+        "acc": 0.10906982421875,
+        "correct": 1787,
+        "count": 16384
+      },
+      "K16_near": {
+        "acc": 0.53521728515625,
+        "correct": 8769,
+        "count": 16384
+      }
+    },
+    "by_distance_bin": {
+      "[0,32)": {
+        "acc": 0.6724711907810499,
+        "correct": 7878,
+        "count": 11715
+      },
+      "[32,64)": {
+        "acc": 0.7573054047064908,
+        "correct": 17571,
+        "count": 23202
+      },
+      "[64,128)": {
+        "acc": 0.029876758371716668,
+        "correct": 240,
+        "count": 8033
+      },
+      "[128,256)": {
+        "acc": 0.014884131333302374,
+        "correct": 641,
+        "count": 43066
+      }
+    }
+  }
+}

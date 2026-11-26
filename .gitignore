@@ -24,3 +24,11 @@ hf_cache/
 # Logs / temporary artifacts
 logs/
 *.log
+*.zip
+
+# Large intermediate checkpoints / adapters / raw per-example dumps
+results/task1/per_example/
+results/task2/part_b/checkpoints/
+results/task2/part_c/qualitative_masks/
+results/task3/adapters/
+results/task3/banks/

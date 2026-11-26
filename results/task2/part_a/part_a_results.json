@@ -1,0 +1,2676 @@
+{
+  "env": {
+    "python": "3.13.16",
+    "torch": "2.14.1+cu130",
+    "transformers": "4.57.1",
+    "cuda_available": true,
+    "cuda_version": "13.0",
+    "device_name": "NVIDIA L4",
+    "device_capability": [
+      8,
+      9
+    ],
+    "common_seed": 6304,
+    "source_revisions": {
+      "repos": {
+        "c4": "allenai/c4",
+        "wikitext": "Salesforce/wikitext",
+        "hellaswag": "Rowan/hellaswag",
+        "gsm8k": "openai/gsm8k",
+        "model_base": "Qwen/Qwen2.5-1.5B",
+        "model_target": "Qwen/Qwen2.5-1.5B-Instruct",
+        "model_draft": "Qwen/Qwen2.5-0.5B-Instruct"
+      },
+      "revisions": {
+        "c4": "1588ec454efa1a09f29cd18ddd04fe05fc8653a2",
+        "wikitext": "b08601e04326c79dfdd32d625aee71d232d685c3",
+        "hellaswag": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+        "gsm8k": "740312add88f781978c0658806c59bc2815b9866",
+        "model_base": "8faed761d45a263340a0528343f099c05c9a4323",
+        "model_target": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+        "model_draft": "7ae557604adf67be50417f59c2c2f167def9a775"
+      }
+    }
+  },
+  "causality_and_edge_cases": {
+    "causality_prefix_max_abs_diff": 0.0,
+    "extreme_score_finite": true,
+    "extreme_score_dense_vs_tiled_max_abs": 0.00014945119619369507,
+    "all_masked_row0_max_abs": 0.0,
+    "all_masked_finite": true
+  },
+  "tile_checks_L512": [
+    {
+      "dtype": "fp32",
+      "block_q": 32,
+      "block_kv": 32,
+      "max_abs_err": 4.76837158203125e-07,
+      "mean_abs_err": 2.397960230382523e-08
+    },
+    {
+      "dtype": "fp32",
+      "block_q": 64,
+      "block_kv": 64,
+      "max_abs_err": 4.76837158203125e-07,
+      "mean_abs_err": 2.492887141158917e-08
+    },
+    {
+      "dtype": "fp32",
+      "block_q": 128,
+      "block_kv": 128,
+      "max_abs_err": 5.066394805908203e-07,
+      "mean_abs_err": 2.5896852662299352e-08
+    },
+    {
+      "dtype": "fp32",
+      "block_q": 64,
+      "block_kv": 128,
+      "max_abs_err": 5.066394805908203e-07,
+      "mean_abs_err": 2.5896852662299352e-08
+    },
+    {
+      "dtype": "fp16",
+      "block_q": 32,
+      "block_kv": 32,
+      "max_abs_err": 0.0026054978370666504,
+      "mean_abs_err": 5.506514571607113e-05
+    },
+    {
+      "dtype": "fp16",
+      "block_q": 64,
+      "block_kv": 64,
+      "max_abs_err": 0.0026054978370666504,
+      "mean_abs_err": 5.506364686880261e-05
+    },
+    {
+      "dtype": "fp16",
+      "block_q": 128,
+      "block_kv": 128,
+      "max_abs_err": 0.0026054978370666504,
+      "mean_abs_err": 5.506363959284499e-05
+    },
+    {
+      "dtype": "fp16",
+      "block_q": 64,
+      "block_kv": 128,
+      "max_abs_err": 0.0026054978370666504,
+      "mean_abs_err": 5.506363959284499e-05
+    }
+  ],
+  "benchmarks": [
+    {
+      "L": 256,
+      "dtype": "fp16",
+      "operator": "dense",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.002016782760620117,
+      "out_mean_abs_err": 7.723062299191952e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.9205759763717651,
+          0.8622080087661743,
+          0.8560640215873718,
+          0.8529919981956482,
+          0.9400320053100586,
+          0.754688024520874,
+          0.7239680290222168,
+          0.7024639844894409,
+          0.6952959895133972,
+          0.6656000018119812
+        ],
+        "mean_ms": 0.7973888039588928,
+        "std_ms": 0.10015216604117988,
+        "median_ms": 0.8038400113582611,
+        "min_ms": 0.6656000018119812,
+        "max_ms": 0.9400320053100586
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 34425344,
+        "peak_reserved_bytes": 52428800
+      },
+      "dq_max_abs_err": 0.0021448135375976562,
+      "dk_max_abs_err": 0.002190232276916504,
+      "dv_max_abs_err": 0.001920461654663086,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          2.1770238876342773,
+          2.1186559200286865,
+          2.12992000579834,
+          2.135040044784546,
+          2.085887908935547,
+          2.125823974609375,
+          2.1493759155273438,
+          2.086911916732788,
+          2.0643839836120605,
+          2.120703935623169
+        ],
+        "mean_ms": 2.119372749328613,
+        "std_ms": 0.03303728743344666,
+        "median_ms": 2.123263955116272,
+        "min_ms": 2.0643839836120605,
+        "max_ms": 2.1770238876342773
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 40798720,
+        "peak_reserved_bytes": 54525952
+      }
+    },
+    {
+      "L": 256,
+      "dtype": "fp16",
+      "operator": "tiled_64",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.002016782760620117,
+      "out_mean_abs_err": 7.211921183625236e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          6.38259220123291,
+          6.4009599685668945,
+          6.318079948425293,
+          6.362112045288086,
+          6.32422399520874,
+          6.296576023101807,
+          6.330399990081787,
+          6.327295780181885,
+          6.292479991912842,
+          6.304736137390137
+        ],
+        "mean_ms": 6.333945608139038,
+        "std_ms": 0.03654960196858388,
+        "median_ms": 6.3257598876953125,
+        "min_ms": 6.292479991912842,
+        "max_ms": 6.4009599685668945
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 25640448,
+        "peak_reserved_bytes": 54525952
+      },
+      "dq_max_abs_err": 0.0021448135375976562,
+      "dk_max_abs_err": 0.002190232276916504,
+      "dv_max_abs_err": 0.002055644989013672,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          18.868223190307617,
+          19.22047996520996,
+          19.582975387573242,
+          19.256256103515625,
+          19.025983810424805,
+          19.386367797851562,
+          19.396608352661133,
+          19.297279357910156,
+          18.980863571166992,
+          18.966527938842773
+        ],
+        "mean_ms": 19.198156547546386,
+        "std_ms": 0.22996591047596132,
+        "median_ms": 19.238368034362793,
+        "min_ms": 18.868223190307617,
+        "max_ms": 19.582975387573242
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 32553984,
+        "peak_reserved_bytes": 58720256
+      }
+    },
+    {
+      "L": 256,
+      "dtype": "fp16",
+      "operator": "sdpa",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": {
+        "supported": {
+          "FLASH_ATTENTION": true,
+          "EFFICIENT_ATTENTION": true,
+          "CUDNN_ATTENTION": true,
+          "MATH": true
+        },
+        "errors": {},
+        "inferred_default_backend": "FLASH_ATTENTION"
+      },
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.002016782760620117,
+      "out_mean_abs_err": 5.909864557906985e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.062463998794555664,
+          0.05734400078654289,
+          0.08499199897050858,
+          0.0655359998345375,
+          0.055296000093221664,
+          0.055296000093221664,
+          0.053247999399900436,
+          0.053247999399900436,
+          0.055296000093221664,
+          0.055296000093221664
+        ],
+        "mean_ms": 0.059801599755883214,
+        "std_ms": 0.009704917348792677,
+        "median_ms": 0.055296000093221664,
+        "min_ms": 0.053247999399900436,
+        "max_ms": 0.08499199897050858
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 24912896,
+        "peak_reserved_bytes": 54525952
+      },
+      "dq_max_abs_err": 0.0018899887800216675,
+      "dk_max_abs_err": 0.002190232276916504,
+      "dv_max_abs_err": 0.002296924591064453,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.532480001449585,
+          0.5396479964256287,
+          0.5017600059509277,
+          0.5160319805145264,
+          0.4700160026550293,
+          0.48127999901771545,
+          0.49561598896980286,
+          0.4853760004043579,
+          0.5109760165214539,
+          0.48022401332855225
+        ],
+        "mean_ms": 0.501340800523758,
+        "std_ms": 0.023245503059508916,
+        "median_ms": 0.4986879974603653,
+        "min_ms": 0.4700160026550293,
+        "max_ms": 0.5396479964256287
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 27805696,
+        "peak_reserved_bytes": 54525952
+      }
+    },
+    {
+      "L": 256,
+      "dtype": "fp32",
+      "operator": "dense",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0,
+      "out_mean_abs_err": 0.0,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.6768640279769897,
+          0.6726719737052917,
+          0.6421120166778564,
+          0.6738880276679993,
+          0.6778879761695862,
+          0.6666240096092224,
+          0.6236159801483154,
+          0.6512640118598938,
+          0.6666240096092224,
+          0.647167980670929
+        ],
+        "mean_ms": 0.6598720014095306,
+        "std_ms": 0.018043704929077087,
+        "median_ms": 0.6666240096092224,
+        "min_ms": 0.6236159801483154,
+        "max_ms": 0.6778879761695862
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 36260352,
+        "peak_reserved_bytes": 54525952
+      },
+      "dq_max_abs_err": 0.0,
+      "dk_max_abs_err": 0.0,
+      "dv_max_abs_err": 0.0,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          1.9886080026626587,
+          2.48524808883667,
+          2.4053759574890137,
+          2.3705599308013916,
+          2.3982720375061035,
+          2.2968320846557617,
+          2.081792116165161,
+          1.9958720207214355,
+          1.9844800233840942,
+          1.9711999893188477
+        ],
+        "mean_ms": 2.1978240251541137,
+        "std_ms": 0.2109248334718971,
+        "median_ms": 2.1893121004104614,
+        "min_ms": 1.9711999893188477,
+        "max_ms": 2.48524808883667
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 41323008,
+        "peak_reserved_bytes": 54525952
+      }
+    },
+    {
+      "L": 256,
+      "dtype": "fp32",
+      "operator": "tiled_64",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 4.76837158203125e-07,
+      "out_mean_abs_err": 2.6245901452170983e-08,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          5.814271926879883,
+          5.859263896942139,
+          5.839871883392334,
+          5.816224098205566,
+          5.804031848907471,
+          5.83465576171875,
+          5.810175895690918,
+          5.834752082824707,
+          5.818367958068848,
+          5.765120029449463
+        ],
+        "mean_ms": 5.819673538208008,
+        "std_ms": 0.02534414843303619,
+        "median_ms": 5.817296028137207,
+        "min_ms": 5.765120029449463,
+        "max_ms": 5.859263896942139
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 25310208,
+        "peak_reserved_bytes": 54525952
+      },
+      "dq_max_abs_err": 7.152557373046875e-07,
+      "dk_max_abs_err": 2.384185791015625e-06,
+      "dv_max_abs_err": 3.0994415283203125e-06,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          17.432544708251953,
+          17.445951461791992,
+          17.40083122253418,
+          17.325056076049805,
+          17.41107177734375,
+          17.441791534423828,
+          17.378271102905273,
+          17.323007583618164,
+          17.238079071044922,
+          17.339391708374023
+        ],
+        "mean_ms": 17.37359962463379,
+        "std_ms": 0.06664918549891662,
+        "median_ms": 17.389551162719727,
+        "min_ms": 17.238079071044922,
+        "max_ms": 17.445951461791992
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 32274432,
+        "peak_reserved_bytes": 58720256
+      }
+    },
+    {
+      "L": 256,
+      "dtype": "fp32",
+      "operator": "sdpa",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": {
+        "supported": {
+          "FLASH_ATTENTION": false,
+          "EFFICIENT_ATTENTION": true,
+          "CUDNN_ATTENTION": false,
+          "MATH": true
+        },
+        "errors": {
+          "FLASH_ATTENTION": "RuntimeError: No available kernel. Aborting execution.",
+          "CUDNN_ATTENTION": "RuntimeError: No available kernel. Aborting execution."
+        },
+        "inferred_default_backend": "EFFICIENT_ATTENTION"
+      },
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 1.430511474609375e-06,
+      "out_mean_abs_err": 8.82632917864612e-08,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.08089599758386612,
+          0.08294399827718735,
+          0.08185599744319916,
+          0.08396799862384796,
+          0.07680000364780426,
+          0.07577600330114365,
+          0.07680000364780426,
+          0.07676800340414047,
+          0.07680000364780426,
+          0.07577600330114365
+        ],
+        "mean_ms": 0.07883840128779411,
+        "std_ms": 0.003197509267020848,
+        "median_ms": 0.07680000364780426,
+        "min_ms": 0.07577600330114365,
+        "max_ms": 0.08396799862384796
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 24380416,
+        "peak_reserved_bytes": 54525952
+      },
+      "dq_max_abs_err": 2.86102294921875e-06,
+      "dk_max_abs_err": 4.5299530029296875e-06,
+      "dv_max_abs_err": 4.0531158447265625e-06,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.6031360030174255,
+          0.6123520135879517,
+          0.5857279896736145,
+          0.596992015838623,
+          0.6062080264091492,
+          0.5877760052680969,
+          0.6256639957427979,
+          0.6103039979934692,
+          0.6072319746017456,
+          0.605184018611908
+        ],
+        "mean_ms": 0.6040576040744782,
+        "std_ms": 0.011749504437155025,
+        "median_ms": 0.6056960225105286,
+        "min_ms": 0.5857279896736145,
+        "max_ms": 0.6256639957427979
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 29124608,
+        "peak_reserved_bytes": 56623104
+      }
+    },
+    {
+      "L": 512,
+      "dtype": "fp16",
+      "operator": "dense",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0015369653701782227,
+      "out_mean_abs_err": 5.955316737527028e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.7413759827613831,
+          0.7208960056304932,
+          0.7413759827613831,
+          0.691103994846344,
+          0.704479992389679,
+          0.7137280106544495,
+          0.707584023475647,
+          0.6850559711456299,
+          0.7024639844894409,
+          0.711679995059967
+        ],
+        "mean_ms": 0.7119743943214416,
+        "std_ms": 0.018671809372762405,
+        "median_ms": 0.709632009267807,
+        "min_ms": 0.6850559711456299,
+        "max_ms": 0.7413759827613831
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 77107712,
+        "peak_reserved_bytes": 100663296
+      },
+      "dq_max_abs_err": 0.0020580291748046875,
+      "dk_max_abs_err": 0.0016667842864990234,
+      "dv_max_abs_err": 0.0026946067810058594,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          2.0797441005706787,
+          2.061311960220337,
+          2.1073920726776123,
+          2.1073920726776123,
+          2.0951039791107178,
+          2.0828158855438232,
+          2.086944103240967,
+          2.0500481128692627,
+          2.100224018096924,
+          2.0797441005706787
+        ],
+        "mean_ms": 2.0850720405578613,
+        "std_ms": 0.018806546004748976,
+        "median_ms": 2.084879994392395,
+        "min_ms": 2.0500481128692627,
+        "max_ms": 2.1073920726776123
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 94178816,
+        "peak_reserved_bytes": 125829120
+      }
+    },
+    {
+      "L": 512,
+      "dtype": "fp16",
+      "operator": "tiled_64",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0017891526222229004,
+      "out_mean_abs_err": 5.593512469204143e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          20.531103134155273,
+          20.6243839263916,
+          20.571136474609375,
+          20.537343978881836,
+          20.577280044555664,
+          20.567039489746094,
+          20.48512077331543,
+          20.561920166015625,
+          20.800512313842773,
+          20.84864044189453
+        ],
+        "mean_ms": 20.61044807434082,
+        "std_ms": 0.11892377153973832,
+        "median_ms": 20.569087982177734,
+        "min_ms": 20.48512077331543,
+        "max_ms": 20.84864044189453
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 33698816,
+        "peak_reserved_bytes": 62914560
+      },
+      "dq_max_abs_err": 0.0019927024841308594,
+      "dk_max_abs_err": 0.0023984909057617188,
+      "dv_max_abs_err": 0.0021131038665771484,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          65.39981079101562,
+          72.67430114746094,
+          63.54326248168945,
+          63.07942581176758,
+          62.8746223449707,
+          63.320064544677734,
+          63.19411087036133,
+          62.884864807128906,
+          63.89750289916992,
+          63.903743743896484
+        ],
+        "mean_ms": 64.47717094421387,
+        "std_ms": 2.9744029717304286,
+        "median_ms": 63.431663513183594,
+        "min_ms": 62.8746223449707,
+        "max_ms": 72.67430114746094
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 56223744,
+        "peak_reserved_bytes": 81788928
+      }
+    },
+    {
+      "L": 512,
+      "dtype": "fp16",
+      "operator": "sdpa",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": {
+        "supported": {
+          "FLASH_ATTENTION": true,
+          "EFFICIENT_ATTENTION": true,
+          "CUDNN_ATTENTION": true,
+          "MATH": true
+        },
+        "errors": {},
+        "inferred_default_backend": "FLASH_ATTENTION"
+      },
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0017192363739013672,
+      "out_mean_abs_err": 4.499767965171486e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.06348799914121628,
+          0.058368001133203506,
+          0.060416001826524734,
+          0.055296000093221664,
+          0.05632000043988228,
+          0.055296000093221664,
+          0.07782399654388428,
+          0.06860800087451935,
+          0.05632000043988228,
+          0.05427199974656105
+        ],
+        "mean_ms": 0.06062080003321171,
+        "std_ms": 0.0075062287582755155,
+        "median_ms": 0.05734400078654289,
+        "min_ms": 0.05427199974656105,
+        "max_ms": 0.07782399654388428
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 32785408,
+        "peak_reserved_bytes": 62914560
+      },
+      "dq_max_abs_err": 0.0019927024841308594,
+      "dk_max_abs_err": 0.0017933845520019531,
+      "dv_max_abs_err": 0.002006053924560547,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.5201280117034912,
+          0.5375999808311462,
+          0.5242879986763,
+          0.6021119952201843,
+          0.563103973865509,
+          0.5806080102920532,
+          0.5724800229072571,
+          0.5386239886283875,
+          0.5273920297622681,
+          0.5120000243186951
+        ],
+        "mean_ms": 0.5478336036205291,
+        "std_ms": 0.029952515095911948,
+        "median_ms": 0.5381119847297668,
+        "min_ms": 0.5120000243186951,
+        "max_ms": 0.6021119952201843
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 38569984,
+        "peak_reserved_bytes": 65011712
+      }
+    },
+    {
+      "L": 512,
+      "dtype": "fp32",
+      "operator": "dense",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0,
+      "out_mean_abs_err": 0.0,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.6860799789428711,
+          0.6410239934921265,
+          0.6881279945373535,
+          0.6973440051078796,
+          0.6799359917640686,
+          0.6440960168838501,
+          0.6984320282936096,
+          0.6912000179290771,
+          0.6676480174064636,
+          0.6461439728736877
+        ],
+        "mean_ms": 0.6740032017230988,
+        "std_ms": 0.022648130548179022,
+        "median_ms": 0.6830079853534698,
+        "min_ms": 0.6410239934921265,
+        "max_ms": 0.6984320282936096
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 80777728,
+        "peak_reserved_bytes": 121634816
+      },
+      "dq_max_abs_err": 0.0,
+      "dk_max_abs_err": 0.0,
+      "dv_max_abs_err": 0.0,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          2.314239978790283,
+          2.3500800132751465,
+          2.283519983291626,
+          2.362368106842041,
+          2.2722558975219727,
+          2.007040023803711,
+          1.985535979270935,
+          2.0039680004119873,
+          1.9875839948654175,
+          1.9783680438995361
+        ],
+        "mean_ms": 2.1544960021972654,
+        "std_ms": 0.1729889996821392,
+        "median_ms": 2.139647960662842,
+        "min_ms": 1.9783680438995361,
+        "max_ms": 2.362368106842041
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 95227392,
+        "peak_reserved_bytes": 130023424
+      }
+    },
+    {
+      "L": 512,
+      "dtype": "fp32",
+      "operator": "tiled_64",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 4.76837158203125e-07,
+      "out_mean_abs_err": 2.508111585086681e-08,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          19.04640007019043,
+          19.20102310180664,
+          19.087360382080078,
+          19.00339126586914,
+          18.885631561279297,
+          18.949119567871094,
+          18.973695755004883,
+          19.020736694335938,
+          18.942975997924805,
+          19.01875114440918
+        ],
+        "mean_ms": 19.01290855407715,
+        "std_ms": 0.08751793943497278,
+        "median_ms": 19.01107120513916,
+        "min_ms": 18.885631561279297,
+        "max_ms": 19.20102310180664
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 33174528,
+        "peak_reserved_bytes": 62914560
+      },
+      "dq_max_abs_err": 8.344650268554688e-07,
+      "dk_max_abs_err": 2.86102294921875e-06,
+      "dv_max_abs_err": 4.291534423828125e-06,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          58.665985107421875,
+          58.72127914428711,
+          58.70182418823242,
+          60.91475296020508,
+          59.970558166503906,
+          60.214271545410156,
+          63.18694305419922,
+          60.97407913208008,
+          61.078529357910156,
+          60.100608825683594
+        ],
+        "mean_ms": 60.25288314819336,
+        "std_ms": 1.399318100806007,
+        "median_ms": 60.157440185546875,
+        "min_ms": 58.665985107421875,
+        "max_ms": 63.18694305419922
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 54438912,
+        "peak_reserved_bytes": 81788928
+      }
+    },
+    {
+      "L": 512,
+      "dtype": "fp32",
+      "operator": "sdpa",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": {
+        "supported": {
+          "FLASH_ATTENTION": false,
+          "EFFICIENT_ATTENTION": true,
+          "CUDNN_ATTENTION": false,
+          "MATH": true
+        },
+        "errors": {
+          "FLASH_ATTENTION": "RuntimeError: No available kernel. Aborting execution.",
+          "CUDNN_ATTENTION": "RuntimeError: No available kernel. Aborting execution."
+        },
+        "inferred_default_backend": "EFFICIENT_ATTENTION"
+      },
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 2.562999725341797e-06,
+      "out_mean_abs_err": 7.222540432394453e-08,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.1454080045223236,
+          0.1382399946451187,
+          0.13312000036239624,
+          0.13516800105571747,
+          0.1372160017490387,
+          0.13926400244235992,
+          0.131071999669075,
+          0.13209599256515503,
+          0.131071999669075,
+          0.130048006772995
+        ],
+        "mean_ms": 0.13527040034532548,
+        "std_ms": 0.0048138900052443565,
+        "median_ms": 0.13414400070905685,
+        "min_ms": 0.130048006772995,
+        "max_ms": 0.1454080045223236
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 31720448,
+        "peak_reserved_bytes": 65011712
+      },
+      "dq_max_abs_err": 2.6226043701171875e-06,
+      "dk_max_abs_err": 5.0067901611328125e-06,
+      "dv_max_abs_err": 5.0067901611328125e-06,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.6133760213851929,
+          0.5949440002441406,
+          0.6256639957427979,
+          0.6021119952201843,
+          0.5959680080413818,
+          0.6133760213851929,
+          0.5990399718284607,
+          0.5836799740791321,
+          0.6072319746017456,
+          0.5754879713058472
+        ],
+        "mean_ms": 0.6010879933834076,
+        "std_ms": 0.014799871627236581,
+        "median_ms": 0.6005759835243225,
+        "min_ms": 0.5754879713058472,
+        "max_ms": 0.6256639957427979
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 42240000,
+        "peak_reserved_bytes": 69206016
+      }
+    },
+    {
+      "L": 1024,
+      "dtype": "fp16",
+      "operator": "dense",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0021758079528808594,
+      "out_mean_abs_err": 4.520532820606604e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          2.5671679973602295,
+          2.531264066696167,
+          2.5620479583740234,
+          2.535423994064331,
+          2.5323519706726074,
+          2.5538558959960938,
+          2.5180160999298096,
+          2.5569279193878174,
+          2.529279947280884,
+          2.5374720096588135
+        ],
+        "mean_ms": 2.5423807859420777,
+        "std_ms": 0.016351766068498218,
+        "median_ms": 2.5364480018615723,
+        "min_ms": 2.5180160999298096,
+        "max_ms": 2.5671679973602295
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 229975040,
+        "peak_reserved_bytes": 272629760
+      },
+      "dq_max_abs_err": 0.0037429332733154297,
+      "dk_max_abs_err": 0.0020639896392822266,
+      "dv_max_abs_err": 0.0025277137756347656,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          6.7399678230285645,
+          6.744063854217529,
+          6.762495994567871,
+          6.770688056945801,
+          6.744063854217529,
+          6.721536159515381,
+          6.744063854217529,
+          6.788095951080322,
+          6.7696638107299805,
+          6.763519763946533
+        ],
+        "mean_ms": 6.754815912246704,
+        "std_ms": 0.019406512942350268,
+        "median_ms": 6.7532799243927,
+        "min_ms": 6.721536159515381,
+        "max_ms": 6.788095951080322
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 289806336,
+        "peak_reserved_bytes": 341835776
+      }
+    },
+    {
+      "L": 1024,
+      "dtype": "fp16",
+      "operator": "tiled_64",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0015326738357543945,
+      "out_mean_abs_err": 4.2557818233035505e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          72.99276733398438,
+          73.86624145507812,
+          74.35469055175781,
+          73.1165771484375,
+          72.97232055664062,
+          72.86681365966797,
+          73.08493041992188,
+          73.38188934326172,
+          76.93405151367188,
+          78.9257583618164
+        ],
+        "mean_ms": 74.24960403442383,
+        "std_ms": 2.0479537684249047,
+        "median_ms": 73.24923324584961,
+        "min_ms": 72.86681365966797,
+        "max_ms": 78.9257583618164
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 49951744,
+        "peak_reserved_bytes": 83886080
+      },
+      "dq_max_abs_err": 0.0037429332733154297,
+      "dk_max_abs_err": 0.0034291744232177734,
+      "dv_max_abs_err": 0.002648591995239258,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          250.16831970214844,
+          240.87142944335938,
+          246.89161682128906,
+          246.90585327148438,
+          241.24517822265625,
+          237.3693389892578,
+          237.40928649902344,
+          237.29254150390625,
+          240.50277709960938,
+          240.9574432373047
+        ],
+        "mean_ms": 241.9613784790039,
+        "std_ms": 4.528326987555164,
+        "median_ms": 240.91443634033203,
+        "min_ms": 237.29254150390625,
+        "max_ms": 250.16831970214844
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 130538496,
+        "peak_reserved_bytes": 165675008
+      }
+    },
+    {
+      "L": 1024,
+      "dtype": "fp16",
+      "operator": "sdpa",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": {
+        "supported": {
+          "FLASH_ATTENTION": true,
+          "EFFICIENT_ATTENTION": true,
+          "CUDNN_ATTENTION": true,
+          "MATH": true
+        },
+        "errors": {},
+        "inferred_default_backend": "FLASH_ATTENTION"
+      },
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.001363992691040039,
+      "out_mean_abs_err": 3.3402124245185405e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.07782399654388428,
+          0.0727040022611618,
+          0.11664000153541565,
+          0.08396799862384796,
+          0.09011200070381165,
+          0.07680000364780426,
+          0.07174400240182877,
+          0.08089599758386612,
+          0.0727040022611618,
+          0.09318400174379349
+        ],
+        "mean_ms": 0.08365760073065757,
+        "std_ms": 0.013706961720543283,
+        "median_ms": 0.0793599970638752,
+        "min_ms": 0.07174400240182877,
+        "max_ms": 0.11664000153541565
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 48530432,
+        "peak_reserved_bytes": 83886080
+      },
+      "dq_max_abs_err": 0.0017898082733154297,
+      "dk_max_abs_err": 0.0018422603607177734,
+      "dv_max_abs_err": 0.0025277137756347656,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.7587839961051941,
+          0.7024639844894409,
+          0.7526400089263916,
+          0.6133760213851929,
+          0.7833600044250488,
+          0.5601279735565186,
+          0.5120000243186951,
+          0.5120000243186951,
+          0.5038080215454102,
+          0.4689919948577881
+        ],
+        "mean_ms": 0.6167552053928376,
+        "std_ms": 0.12179053147734398,
+        "median_ms": 0.5867519974708557,
+        "min_ms": 0.4689919948577881,
+        "max_ms": 0.7833600044250488
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 60098560,
+        "peak_reserved_bytes": 92274688
+      }
+    },
+    {
+      "L": 1024,
+      "dtype": "fp32",
+      "operator": "dense",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0,
+      "out_mean_abs_err": 0.0,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          2.7156479358673096,
+          2.726912021636963,
+          2.7105278968811035,
+          2.727936029434204,
+          2.7156479358673096,
+          2.727936029434204,
+          2.718719959259033,
+          2.727936029434204,
+          2.712575912475586,
+          2.7146239280700684
+        ],
+        "mean_ms": 2.7198463678359985,
+        "std_ms": 0.0070690333727301295,
+        "median_ms": 2.7171839475631714,
+        "min_ms": 2.7105278968811035,
+        "max_ms": 2.727936029434204
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 245703680,
+        "peak_reserved_bytes": 281018368
+      },
+      "dq_max_abs_err": 0.0,
+      "dk_max_abs_err": 0.0,
+      "dv_max_abs_err": 0.0,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          7.539711952209473,
+          7.4844160079956055,
+          7.485439777374268,
+          7.480319976806641,
+          7.501823902130127,
+          7.540639877319336,
+          7.491583824157715,
+          7.500800132751465,
+          7.497727870941162,
+          7.512063980102539
+        ],
+        "mean_ms": 7.503452730178833,
+        "std_ms": 0.02154347170030852,
+        "median_ms": 7.4992640018463135,
+        "min_ms": 7.480319976806641,
+        "max_ms": 7.540639877319336
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 291903488,
+        "peak_reserved_bytes": 314572800
+      }
+    },
+    {
+      "L": 1024,
+      "dtype": "fp32",
+      "operator": "tiled_64",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 4.76837158203125e-07,
+      "out_mean_abs_err": 2.373205987282745e-08,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          64.7741470336914,
+          64.8806381225586,
+          65.62611389160156,
+          65.87904357910156,
+          65.42438507080078,
+          65.29023742675781,
+          64.71878051757812,
+          65.8677749633789,
+          63.89759826660156,
+          63.71430587768555
+        ],
+        "mean_ms": 65.00730247497559,
+        "std_ms": 0.7596941615990723,
+        "median_ms": 65.0854377746582,
+        "min_ms": 63.71430587768555,
+        "max_ms": 65.87904357910156
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 48903168,
+        "peak_reserved_bytes": 79691776
+      },
+      "dq_max_abs_err": 8.940696716308594e-07,
+      "dk_max_abs_err": 5.9604644775390625e-06,
+      "dv_max_abs_err": 6.198883056640625e-06,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          213.1240997314453,
+          211.81234741210938,
+          214.58738708496094,
+          223.93959045410156,
+          212.31607055664062,
+          216.45619201660156,
+          215.59193420410156,
+          216.2882537841797,
+          212.31411743164062,
+          211.49081420898438
+        ],
+        "mean_ms": 214.79208068847657,
+        "std_ms": 3.714785170845358,
+        "median_ms": 213.85574340820312,
+        "min_ms": 211.49081420898438,
+        "max_ms": 223.93959045410156
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 118414336,
+        "peak_reserved_bytes": 136314880
+      }
+    },
+    {
+      "L": 1024,
+      "dtype": "fp32",
+      "operator": "sdpa",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": {
+        "supported": {
+          "FLASH_ATTENTION": false,
+          "EFFICIENT_ATTENTION": true,
+          "CUDNN_ATTENTION": false,
+          "MATH": true
+        },
+        "errors": {
+          "FLASH_ATTENTION": "RuntimeError: No available kernel. Aborting execution.",
+          "CUDNN_ATTENTION": "RuntimeError: No available kernel. Aborting execution."
+        },
+        "inferred_default_backend": "EFFICIENT_ATTENTION"
+      },
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 1.9073486328125e-06,
+      "out_mean_abs_err": 5.783652667901151e-08,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.25600001215934753,
+          0.22630399465560913,
+          0.23654399812221527,
+          0.22835199534893036,
+          0.23244799673557281,
+          0.22323200106620789,
+          0.22835199534893036,
+          0.22835199534893036,
+          0.2242559939622879,
+          0.2242559939622879
+        ],
+        "mean_ms": 0.23080959767103196,
+        "std_ms": 0.009728902996419785,
+        "median_ms": 0.22835199534893036,
+        "min_ms": 0.22323200106620789,
+        "max_ms": 0.25600001215934753
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 46400512,
+        "peak_reserved_bytes": 77594624
+      },
+      "dq_max_abs_err": 4.172325134277344e-06,
+      "dk_max_abs_err": 6.67572021484375e-06,
+      "dv_max_abs_err": 6.4373016357421875e-06,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.9646080136299133,
+          0.9481599926948547,
+          0.9502720236778259,
+          0.9328640103340149,
+          0.9451519846916199,
+          0.92467200756073,
+          0.907263994216919,
+          0.9164800047874451,
+          0.9215999841690063,
+          0.9154559969902039
+        ],
+        "mean_ms": 0.9326528012752533,
+        "std_ms": 0.018607222485926674,
+        "median_ms": 0.9287680089473724,
+        "min_ms": 0.907263994216919,
+        "max_ms": 0.9646080136299133
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 65374208,
+        "peak_reserved_bytes": 77594624
+      }
+    },
+    {
+      "L": 2048,
+      "dtype": "fp16",
+      "operator": "dense",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0019555091857910156,
+      "out_mean_abs_err": 3.3693348086671904e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          15.623167991638184,
+          15.552512168884277,
+          15.558655738830566,
+          15.529984474182129,
+          15.552512168884277,
+          15.502335548400879,
+          15.544320106506348,
+          15.551487922668457,
+          15.542271614074707,
+          15.528960227966309
+        ],
+        "mean_ms": 15.548620796203613,
+        "std_ms": 0.030968573764691414,
+        "median_ms": 15.547904014587402,
+        "min_ms": 15.502335548400879,
+        "max_ms": 15.623167991638184
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 814106624,
+        "peak_reserved_bytes": 950009856
+      },
+      "dq_max_abs_err": 0.0015804767608642578,
+      "dk_max_abs_err": 0.001660659909248352,
+      "dv_max_abs_err": 0.0027875900268554688,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          38.5536003112793,
+          38.44403076171875,
+          38.547454833984375,
+          38.428672790527344,
+          38.48704147338867,
+          38.45529556274414,
+          38.414337158203125,
+          38.368255615234375,
+          38.43584060668945,
+          38.30681610107422
+        ],
+        "mean_ms": 38.44413452148437,
+        "std_ms": 0.07485773636505226,
+        "median_ms": 38.4399356842041,
+        "min_ms": 38.30681610107422,
+        "max_ms": 38.5536003112793
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 1036528640,
+        "peak_reserved_bytes": 1218445312
+      }
+    },
+    {
+      "L": 2048,
+      "dtype": "fp16",
+      "operator": "tiled_64",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.001803755760192871,
+      "out_mean_abs_err": 3.177805047016591e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          270.6954345703125,
+          264.479736328125,
+          266.5912170410156,
+          266.39666748046875,
+          264.816650390625,
+          263.6554870605469,
+          264.6772766113281,
+          276.1564025878906,
+          284.96588134765625,
+          283.5548095703125
+        ],
+        "mean_ms": 270.5989562988281,
+        "std_ms": 8.117445972070012,
+        "median_ms": 266.4939422607422,
+        "min_ms": 263.6554870605469,
+        "max_ms": 284.96588134765625
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 82457600,
+        "peak_reserved_bytes": 213909504
+      },
+      "dq_max_abs_err": 0.0015804767608642578,
+      "dk_max_abs_err": 0.002142876386642456,
+      "dv_max_abs_err": 0.003795146942138672,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          925.2402954101562,
+          899.778564453125,
+          892.4620971679688,
+          886.8003540039062,
+          910.14453125,
+          922.1375732421875,
+          1035.0458984375,
+          926.8028564453125,
+          946.0275268554688,
+          938.9127807617188
+        ],
+        "mean_ms": 928.3352478027343,
+        "std_ms": 42.191124258798794,
+        "median_ms": 923.6889343261719,
+        "min_ms": 886.8003540039062,
+        "max_ms": 1035.0458984375
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 383073280,
+        "peak_reserved_bytes": 503316480
+      }
+    },
+    {
+      "L": 2048,
+      "dtype": "fp16",
+      "operator": "sdpa",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": {
+        "supported": {
+          "FLASH_ATTENTION": true,
+          "EFFICIENT_ATTENTION": true,
+          "CUDNN_ATTENTION": true,
+          "MATH": true
+        },
+        "errors": {},
+        "inferred_default_backend": "FLASH_ATTENTION"
+      },
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0016109943389892578,
+      "out_mean_abs_err": 2.4679588022991084e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.12800000607967377,
+          0.11971200257539749,
+          0.12800000607967377,
+          0.11980800330638885,
+          0.11776000261306763,
+          0.11878400295972824,
+          0.1228799968957901,
+          0.11878400295972824,
+          0.1157120019197464,
+          0.12185599654912949
+        ],
+        "mean_ms": 0.1211296021938324,
+        "std_ms": 0.004129311314348019,
+        "median_ms": 0.11976000294089317,
+        "min_ms": 0.1157120019197464,
+        "max_ms": 0.12800000607967377
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 80020480,
+        "peak_reserved_bytes": 211812352
+      },
+      "dq_max_abs_err": 0.001313328742980957,
+      "dk_max_abs_err": 0.0019305944442749023,
+      "dv_max_abs_err": 0.0027875900268554688,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.5898240208625793,
+          0.6072319746017456,
+          0.591871976852417,
+          0.6082559823989868,
+          0.5939199924468994,
+          0.605184018611908,
+          0.5939199924468994,
+          0.5683199763298035,
+          0.5734400153160095,
+          0.591871976852417
+        ],
+        "mean_ms": 0.5923839926719665,
+        "std_ms": 0.01327474970094537,
+        "median_ms": 0.5928959846496582,
+        "min_ms": 0.5683199763298035,
+        "max_ms": 0.6082559823989868
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 103155712,
+        "peak_reserved_bytes": 211812352
+      }
+    },
+    {
+      "L": 2048,
+      "dtype": "fp32",
+      "operator": "dense",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0,
+      "out_mean_abs_err": 0.0,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          15.301631927490234,
+          15.212544441223145,
+          15.258624076843262,
+          15.20844841003418,
+          15.212544441223145,
+          15.23196792602539,
+          15.245311737060547,
+          15.252479553222656,
+          15.212544441223145,
+          15.230976104736328
+        ],
+        "mean_ms": 15.236707305908203,
+        "std_ms": 0.02910470949009197,
+        "median_ms": 15.23147201538086,
+        "min_ms": 15.20844841003418,
+        "max_ms": 15.301631927490234
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 879118336,
+        "peak_reserved_bytes": 1017118720
+      },
+      "dq_max_abs_err": 0.0,
+      "dk_max_abs_err": 0.0,
+      "dv_max_abs_err": 0.0,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          38.85465621948242,
+          38.800289154052734,
+          38.72972869873047,
+          38.752254486083984,
+          38.69491195678711,
+          38.763519287109375,
+          38.67443084716797,
+          38.7512321472168,
+          38.772735595703125,
+          38.842369079589844
+        ],
+        "mean_ms": 38.76361274719238,
+        "std_ms": 0.057757631188782556,
+        "median_ms": 38.75788688659668,
+        "min_ms": 38.67443084716797,
+        "max_ms": 38.85465621948242
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 1040722944,
+        "peak_reserved_bytes": 1151336448
+      }
+    },
+    {
+      "L": 2048,
+      "dtype": "fp32",
+      "operator": "tiled_64",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 7.152557373046875e-07,
+      "out_mean_abs_err": 2.2877486571815098e-08,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          241.98348999023438,
+          241.7479705810547,
+          241.6926727294922,
+          241.22061157226562,
+          241.9220428466797,
+          242.74432373046875,
+          241.12435913085938,
+          240.15052795410156,
+          241.80323791503906,
+          241.6240692138672
+        ],
+        "mean_ms": 241.60133056640626,
+        "std_ms": 0.6752565599585287,
+        "median_ms": 241.72032165527344,
+        "min_ms": 240.15052795410156,
+        "max_ms": 242.74432373046875
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 80360448,
+        "peak_reserved_bytes": 216006656
+      },
+      "dq_max_abs_err": 9.5367431640625e-07,
+      "dk_max_abs_err": 7.62939453125e-06,
+      "dv_max_abs_err": 1.0967254638671875e-05,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          827.4923706054688,
+          828.8583984375,
+          841.427978515625,
+          838.245361328125,
+          833.4663696289062,
+          843.536376953125,
+          827.9234619140625,
+          816.5017700195312,
+          817.06494140625,
+          818.9102172851562
+        ],
+        "mean_ms": 829.342724609375,
+        "std_ms": 9.854037470538538,
+        "median_ms": 828.3909301757812,
+        "min_ms": 816.5017700195312,
+        "max_ms": 843.536376953125
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 324811776,
+        "peak_reserved_bytes": 436207616
+      }
+    },
+    {
+      "L": 2048,
+      "dtype": "fp32",
+      "operator": "sdpa",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": {
+        "supported": {
+          "FLASH_ATTENTION": false,
+          "EFFICIENT_ATTENTION": true,
+          "CUDNN_ATTENTION": false,
+          "MATH": true
+        },
+        "errors": {
+          "FLASH_ATTENTION": "RuntimeError: No available kernel. Aborting execution.",
+          "CUDNN_ATTENTION": "RuntimeError: No available kernel. Aborting execution."
+        },
+        "inferred_default_backend": "EFFICIENT_ATTENTION"
+      },
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 2.1457672119140625e-06,
+      "out_mean_abs_err": 4.669533382184454e-08,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.6737920045852661,
+          0.6563839912414551,
+          0.66457599401474,
+          0.6625279784202576,
+          0.6359040141105652,
+          0.6348159909248352,
+          0.66457599401474,
+          0.66348797082901,
+          0.647167980670929,
+          0.6676480174064636
+        ],
+        "mean_ms": 0.6570879936218261,
+        "std_ms": 0.01340371795681605,
+        "median_ms": 0.6630079746246338,
+        "min_ms": 0.6348159909248352,
+        "max_ms": 0.6737920045852661
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 75760640,
+        "peak_reserved_bytes": 211812352
+      },
+      "dq_max_abs_err": 2.2649765014648438e-06,
+      "dk_max_abs_err": 8.821487426757812e-06,
+      "dv_max_abs_err": 1.0967254638671875e-05,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          2.3592960834503174,
+          2.3552000522613525,
+          2.3541760444641113,
+          2.371583938598633,
+          2.3511040210723877,
+          2.348031997680664,
+          2.3930881023406982,
+          2.372607946395874,
+          2.341887950897217,
+          2.371583938598633
+        ],
+        "mean_ms": 2.3618560075759887,
+        "std_ms": 0.01525917484556139,
+        "median_ms": 2.357248067855835,
+        "min_ms": 2.341887950897217,
+        "max_ms": 2.3930881023406982
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 113707008,
+        "peak_reserved_bytes": 211812352
+      }
+    },
+    {
+      "L": 4096,
+      "dtype": "fp16",
+      "operator": "dense",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0019693374633789062,
+      "out_mean_abs_err": 2.4605851649539545e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          62.20083236694336,
+          62.17728042602539,
+          62.17932891845703,
+          62.051326751708984,
+          62.076927185058594,
+          62.11484909057617,
+          62.1209602355957,
+          62.19776153564453,
+          62.10348892211914,
+          62.13529586791992
+        ],
+        "mean_ms": 62.13580513000488,
+        "std_ms": 0.05162793172089847,
+        "median_ms": 62.12812805175781,
+        "min_ms": 62.051326751708984,
+        "max_ms": 62.20083236694336
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 3095957504,
+        "peak_reserved_bytes": 3433037824
+      },
+      "dq_max_abs_err": 0.0017098188400268555,
+      "dk_max_abs_err": 0.001752614974975586,
+      "dv_max_abs_err": 0.002157449722290039,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          153.70445251464844,
+          153.7893829345703,
+          153.78329467773438,
+          153.53036499023438,
+          153.82118225097656,
+          153.9665985107422,
+          153.79251098632812,
+          153.7771453857422,
+          153.95225524902344,
+          154.04339599609375
+        ],
+        "mean_ms": 153.81605834960936,
+        "std_ms": 0.14562161256838096,
+        "median_ms": 153.79094696044922,
+        "min_ms": 153.53036499023438,
+        "max_ms": 154.04339599609375
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 3951842304,
+        "peak_reserved_bytes": 4506779648
+      }
+    },
+    {
+      "L": 4096,
+      "dtype": "fp16",
+      "operator": "tiled_64",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0018856525421142578,
+      "out_mean_abs_err": 2.3195640096673742e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          1044.5137939453125,
+          1038.012451171875,
+          1037.3673095703125,
+          1036.1497802734375,
+          1024.78955078125,
+          1035.4237060546875,
+          1023.3385009765625,
+          1025.1715087890625,
+          1024.5877685546875,
+          1038.5172119140625
+        ],
+        "mean_ms": 1032.787158203125,
+        "std_ms": 7.567140519240949,
+        "median_ms": 1035.7867431640625,
+        "min_ms": 1023.3385009765625,
+        "max_ms": 1044.5137939453125
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 147469312,
+        "peak_reserved_bytes": 216006656
+      },
+      "dq_max_abs_err": 0.0017273426055908203,
+      "dk_max_abs_err": 0.0020456314086914062,
+      "dv_max_abs_err": 0.003586292266845703,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          3710.28369140625,
+          3571.23681640625,
+          3613.771728515625,
+          3547.03857421875,
+          3529.1513671875,
+          3563.4482421875,
+          3537.1376953125,
+          3546.06494140625,
+          3556.335693359375,
+          3627.9326171875
+        ],
+        "mean_ms": 3580.24013671875,
+        "std_ms": 55.760287464247995,
+        "median_ms": 3559.8919677734375,
+        "min_ms": 3529.1513671875,
+        "max_ms": 3710.28369140625
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 1302592512,
+        "peak_reserved_bytes": 1346371584
+      }
+    },
+    {
+      "L": 4096,
+      "dtype": "fp16",
+      "operator": "sdpa",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": {
+        "supported": {
+          "FLASH_ATTENTION": true,
+          "EFFICIENT_ATTENTION": true,
+          "CUDNN_ATTENTION": true,
+          "MATH": true
+        },
+        "errors": {},
+        "inferred_default_backend": "FLASH_ATTENTION"
+      },
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0014319419860839844,
+      "out_mean_abs_err": 1.7920661775860935e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          0.319487988948822,
+          0.31436800956726074,
+          0.31119999289512634,
+          0.319487988948822,
+          0.3041279911994934,
+          0.317440003156662,
+          0.30928000807762146,
+          0.3030399978160858,
+          0.3235839903354645,
+          0.3041279911994934
+        ],
+        "mean_ms": 0.31261439621448517,
+        "std_ms": 0.007378739107363322,
+        "median_ms": 0.31278400123119354,
+        "min_ms": 0.3030399978160858,
+        "max_ms": 0.3235839903354645
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 143000576,
+        "peak_reserved_bytes": 211812352
+      },
+      "dq_max_abs_err": 0.0023651123046875,
+      "dk_max_abs_err": 0.0018209218978881836,
+      "dv_max_abs_err": 0.002157449722290039,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          1.1909120082855225,
+          1.1816960573196411,
+          1.1694079637527466,
+          1.1673599481582642,
+          1.1673599481582642,
+          1.1673599481582642,
+          1.1621760129928589,
+          1.1827199459075928,
+          1.18886399269104,
+          1.1704319715499878
+        ],
+        "mean_ms": 1.1748287796974182,
+        "std_ms": 0.010226585495347884,
+        "median_ms": 1.1699199676513672,
+        "min_ms": 1.1621760129928589,
+        "max_ms": 1.1909120082855225
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 189270016,
+        "peak_reserved_bytes": 211812352
+      }
+    },
+    {
+      "L": 4096,
+      "dtype": "fp32",
+      "operator": "dense",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0,
+      "out_mean_abs_err": 0.0,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          60.21529769897461,
+          60.22041702270508,
+          60.212127685546875,
+          60.20403289794922,
+          60.27775955200195,
+          60.15488052368164,
+          60.14771270751953,
+          60.16204833984375,
+          60.20403289794922,
+          60.20003128051758
+        ],
+        "mean_ms": 60.19983406066895,
+        "std_ms": 0.038132537655910424,
+        "median_ms": 60.20403289794922,
+        "min_ms": 60.14771270751953,
+        "max_ms": 60.27775955200195
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 3360198656,
+        "peak_reserved_bytes": 3969908736
+      },
+      "dq_max_abs_err": 0.0,
+      "dk_max_abs_err": 0.0,
+      "dv_max_abs_err": 0.0,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          153.03578186035156,
+          153.0408935546875,
+          153.19142150878906,
+          153.0634307861328,
+          153.091064453125,
+          152.92108154296875,
+          153.1709442138672,
+          153.07571411132812,
+          153.28256225585938,
+          153.2579803466797
+        ],
+        "mean_ms": 153.11308746337892,
+        "std_ms": 0.11135590358460223,
+        "median_ms": 153.08338928222656,
+        "min_ms": 152.92108154296875,
+        "max_ms": 153.28256225585938
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 3960230912,
+        "peak_reserved_bytes": 4506779648
+      }
+    },
+    {
+      "L": 4096,
+      "dtype": "fp32",
+      "operator": "tiled_64",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 7.450580596923828e-07,
+      "out_mean_abs_err": 2.2257754750398817e-08,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          948.58447265625,
+          945.3219604492188,
+          940.5593872070312,
+          947.8082275390625,
+          939.7525024414062,
+          939.77392578125,
+          943.7265625,
+          943.0435791015625,
+          949.9268188476562,
+          950.2586669921875
+        ],
+        "mean_ms": 944.8756103515625,
+        "std_ms": 4.11807653933013,
+        "median_ms": 944.5242614746094,
+        "min_ms": 939.7525024414062,
+        "max_ms": 950.2586669921875
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 143275008,
+        "peak_reserved_bytes": 757071872
+      },
+      "dq_max_abs_err": 8.940696716308594e-07,
+      "dk_max_abs_err": 1.0728836059570312e-05,
+      "dv_max_abs_err": 1.33514404296875e-05,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          3291.06640625,
+          3274.937255859375,
+          3254.998046875,
+          3283.260498046875,
+          3276.588134765625,
+          3367.0205078125,
+          3301.3525390625,
+          3353.28662109375,
+          3270.31201171875,
+          3276.304443359375
+        ],
+        "mean_ms": 3294.912646484375,
+        "std_ms": 36.63413495835318,
+        "median_ms": 3279.92431640625,
+        "min_ms": 3254.998046875,
+        "max_ms": 3367.0205078125
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 1051393024,
+        "peak_reserved_bytes": 1614807040
+      }
+    },
+    {
+      "L": 4096,
+      "dtype": "fp32",
+      "operator": "sdpa",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": {
+        "supported": {
+          "FLASH_ATTENTION": false,
+          "EFFICIENT_ATTENTION": true,
+          "CUDNN_ATTENTION": false,
+          "MATH": true
+        },
+        "errors": {
+          "FLASH_ATTENTION": "RuntimeError: No available kernel. Aborting execution.",
+          "CUDNN_ATTENTION": "RuntimeError: No available kernel. Aborting execution."
+        },
+        "inferred_default_backend": "EFFICIENT_ATTENTION"
+      },
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 1.430511474609375e-06,
+      "out_mean_abs_err": 3.820428418066513e-08,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          2.2353920936584473,
+          2.1779520511627197,
+          2.214911937713623,
+          2.2067201137542725,
+          2.2732160091400146,
+          2.263040065765381,
+          2.190335988998413,
+          2.3808000087738037,
+          2.40230393409729,
+          2.386944055557251
+        ],
+        "mean_ms": 2.2731616258621217,
+        "std_ms": 0.08594031197134448,
+        "median_ms": 2.249216079711914,
+        "min_ms": 2.1779520511627197,
+        "max_ms": 2.40230393409729
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 134480896,
+        "peak_reserved_bytes": 748683264
+      },
+      "dq_max_abs_err": 2.7418136596679688e-06,
+      "dk_max_abs_err": 9.5367431640625e-06,
+      "dv_max_abs_err": 1.1682510375976562e-05,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          9.456640243530273,
+          9.74233627319336,
+          9.785344123840332,
+          9.812992095947266,
+          9.646080017089844,
+          9.62559986114502,
+          9.492480278015137,
+          9.517056465148926,
+          9.508864402770996,
+          9.479167938232422
+        ],
+        "mean_ms": 9.606656169891357,
+        "std_ms": 0.13507676473101698,
+        "median_ms": 9.571328163146973,
+        "min_ms": 9.456640243530273,
+        "max_ms": 9.812992095947266
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 210372608,
+        "peak_reserved_bytes": 748683264
+      }
+    },
+    {
+      "L": 8192,
+      "dtype": "fp16",
+      "operator": "dense",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0015527009963989258,
+      "out_mean_abs_err": 1.783631887519732e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          246.8474884033203,
+          246.84442138671875,
+          246.77171325683594,
+          246.78594970703125,
+          247.05535888671875,
+          247.26527404785156,
+          246.6867218017578,
+          246.85670471191406,
+          246.90789794921875,
+          246.88128662109375
+        ],
+        "mean_ms": 246.8902816772461,
+        "std_ms": 0.16319827870508036,
+        "median_ms": 246.8520965576172,
+        "min_ms": 246.6867218017578,
+        "max_ms": 247.26527404785156
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 12114010112,
+        "peak_reserved_bytes": 13633585152
+      },
+      "dq_max_abs_err": 0.0020644664764404297,
+      "dk_max_abs_err": 0.0022482872009277344,
+      "dv_max_abs_err": 0.001965165138244629,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          611.078125,
+          612.1800537109375,
+          611.9505615234375,
+          612.0386352539062,
+          612.0499267578125,
+          612.18408203125,
+          612.021240234375,
+          612.1809692382812,
+          610.6152954101562,
+          612.4503173828125
+        ],
+        "mean_ms": 611.8749206542968,
+        "std_ms": 0.5695547683716554,
+        "median_ms": 612.0442810058594,
+        "min_ms": 610.6152954101562,
+        "max_ms": 612.4503173828125
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 15469945856,
+        "peak_reserved_bytes": 17928552448
+      }
+    },
+    {
+      "L": 8192,
+      "dtype": "fp16",
+      "operator": "tiled_64",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0015306472778320312,
+      "out_mean_abs_err": 1.682140282355249e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          3991.607177734375,
+          4013.930419921875,
+          3990.658935546875,
+          4032.878662109375,
+          4103.5087890625,
+          4053.7978515625,
+          4083.40283203125,
+          4080.74951171875,
+          4131.91455078125,
+          4063.7685546875
+        ],
+        "mean_ms": 4054.621728515625,
+        "std_ms": 47.31701275672728,
+        "median_ms": 4058.783203125,
+        "min_ms": 3990.658935546875,
+        "max_ms": 4131.91455078125
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 277492736,
+        "peak_reserved_bytes": 757071872
+      },
+      "dq_max_abs_err": 0.0020644664764404297,
+      "dk_max_abs_err": 0.002351045608520508,
+      "dv_max_abs_err": 0.0034127235412597656,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          14360.1650390625,
+          14238.8310546875,
+          14265.0546875,
+          14434.955078125,
+          14219.00390625,
+          14300.626953125,
+          14187.4765625,
+          14319.1455078125,
+          14233.5732421875,
+          14333.234375
+        ],
+        "mean_ms": 14289.206640625,
+        "std_ms": 75.08249261225214,
+        "median_ms": 14282.8408203125,
+        "min_ms": 14187.4765625,
+        "max_ms": 14434.955078125
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 4799429632,
+        "peak_reserved_bytes": 5230297088
+      }
+    },
+    {
+      "L": 8192,
+      "dtype": "fp16",
+      "operator": "sdpa",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": {
+        "supported": {
+          "FLASH_ATTENTION": true,
+          "EFFICIENT_ATTENTION": true,
+          "CUDNN_ATTENTION": true,
+          "MATH": true
+        },
+        "errors": {},
+        "inferred_default_backend": "FLASH_ATTENTION"
+      },
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0017479658126831055,
+      "out_mean_abs_err": 1.283072469959734e-05,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          1.0485759973526,
+          1.0373120307922363,
+          1.0915839672088623,
+          1.026047945022583,
+          1.0393600463867188,
+          1.0444799661636353,
+          1.087488055229187,
+          1.0629119873046875,
+          1.070080041885376,
+          1.06496000289917
+        ],
+        "mean_ms": 1.0572800040245056,
+        "std_ms": 0.021803969778688682,
+        "median_ms": 1.0557439923286438,
+        "min_ms": 1.026047945022583,
+        "max_ms": 1.0915839672088623
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 268960768,
+        "peak_reserved_bytes": 748683264
+      },
+      "dq_max_abs_err": 0.0020644664764404297,
+      "dk_max_abs_err": 0.0022482872009277344,
+      "dv_max_abs_err": 0.0026633739471435547,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          3.9475200176239014,
+          3.915776014328003,
+          3.9086079597473145,
+          3.9045119285583496,
+          3.9096319675445557,
+          4.056064128875732,
+          4.541440010070801,
+          4.4912638664245605,
+          4.602880001068115,
+          4.649983882904053
+        ],
+        "mean_ms": 4.192767977714539,
+        "std_ms": 0.3312390468326795,
+        "median_ms": 4.001792073249817,
+        "min_ms": 3.9045119285583496,
+        "max_ms": 4.649983882904053
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 361498624,
+        "peak_reserved_bytes": 748683264
+      }
+    },
+    {
+      "L": 8192,
+      "dtype": "fp32",
+      "operator": "dense",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 0.0,
+      "out_mean_abs_err": 0.0,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          238.70361328125,
+          239.025146484375,
+          239.3753662109375,
+          239.01388549804688,
+          239.60780334472656,
+          239.62112426757812,
+          239.10911560058594,
+          238.2223358154297,
+          239.0108184814453,
+          239.05587768554688
+        ],
+        "mean_ms": 239.0745086669922,
+        "std_ms": 0.4148871376250853,
+        "median_ms": 239.04051208496094,
+        "min_ms": 238.2223358154297,
+        "max_ms": 239.62112426757812
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 13179363328,
+        "peak_reserved_bytes": 13600030720
+      },
+      "dq_max_abs_err": 0.0,
+      "dk_max_abs_err": 0.0,
+      "dv_max_abs_err": 0.0,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          606.7015380859375,
+          607.3016357421875,
+          606.8336791992188,
+          606.7814331054688,
+          607.151123046875,
+          607.1439208984375,
+          607.025146484375,
+          607.088623046875,
+          606.7343139648438,
+          607.1050415039062
+        ],
+        "mean_ms": 606.9866455078125,
+        "std_ms": 0.2074648253694405,
+        "median_ms": 607.056884765625,
+        "min_ms": 606.7015380859375,
+        "max_ms": 607.3016357421875
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 15486723072,
+        "peak_reserved_bytes": 15747514368
+      }
+    },
+    {
+      "L": 8192,
+      "dtype": "fp32",
+      "operator": "tiled_64",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": null,
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 5.960464477539062e-07,
+      "out_mean_abs_err": 2.1486322054897755e-08,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          3707.43603515625,
+          3714.768798828125,
+          3693.29052734375,
+          3696.1669921875,
+          3708.865478515625,
+          3713.376220703125,
+          3706.599365234375,
+          3703.00732421875,
+          3717.747802734375,
+          3631.81787109375
+        ],
+        "mean_ms": 3699.3076416015624,
+        "std_ms": 24.949349184380324,
+        "median_ms": 3707.0177001953125,
+        "min_ms": 3631.81787109375,
+        "max_ms": 3717.747802734375
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 269104128,
+        "peak_reserved_bytes": 731906048
+      },
+      "dq_max_abs_err": 2.86102294921875e-06,
+      "dk_max_abs_err": 1.3589859008789062e-05,
+      "dv_max_abs_err": 2.288818359375e-05,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          13151.31640625,
+          13289.142578125,
+          13329.96875,
+          13188.6044921875,
+          13283.23046875,
+          13330.9267578125,
+          13158.833984375,
+          13356.435546875,
+          13188.177734375,
+          13263.4677734375
+        ],
+        "mean_ms": 13254.01044921875,
+        "std_ms": 76.4276790318214,
+        "median_ms": 13273.34912109375,
+        "min_ms": 13151.31640625,
+        "max_ms": 13356.435546875
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 3759700992,
+        "peak_reserved_bytes": 4120903680
+      }
+    },
+    {
+      "L": 8192,
+      "dtype": "fp32",
+      "operator": "sdpa",
+      "B": 2,
+      "H": 4,
+      "d_h": 64,
+      "sdpa_probe": {
+        "supported": {
+          "FLASH_ATTENTION": false,
+          "EFFICIENT_ATTENTION": true,
+          "CUDNN_ATTENTION": false,
+          "MATH": true
+        },
+        "errors": {
+          "FLASH_ATTENTION": "RuntimeError: No available kernel. Aborting execution.",
+          "CUDNN_ATTENTION": "RuntimeError: No available kernel. Aborting execution."
+        },
+        "inferred_default_backend": "EFFICIENT_ATTENTION"
+      },
+      "fwd_status": "ok",
+      "fwdbwd_status": "ok",
+      "out_max_abs_err": 2.5033950805664062e-06,
+      "out_mean_abs_err": 3.186251973374965e-08,
+      "fwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          8.266752243041992,
+          8.369152069091797,
+          8.287232398986816,
+          10.145792007446289,
+          10.512384414672852,
+          10.496000289916992,
+          10.781696319580078,
+          10.9486083984375,
+          10.621952056884766,
+          10.926079750061035
+        ],
+        "mean_ms": 9.935564994812012,
+        "std_ms": 1.1470266584372895,
+        "median_ms": 10.504192352294922,
+        "min_ms": 8.266752243041992,
+        "max_ms": 10.9486083984375
+      },
+      "fwd_memory": {
+        "peak_allocated_bytes": 251921408,
+        "peak_reserved_bytes": 715128832
+      },
+      "dq_max_abs_err": 3.337860107421875e-06,
+      "dk_max_abs_err": 1.2159347534179688e-05,
+      "dv_max_abs_err": 2.574920654296875e-05,
+      "fwdbwd_latency": {
+        "unit": "ms",
+        "warmup": 3,
+        "repeats": 10,
+        "samples_ms": [
+          37.40467071533203,
+          36.940799713134766,
+          36.56294250488281,
+          36.922367095947266,
+          37.975040435791016,
+          38.69900894165039,
+          38.26278305053711,
+          38.12966537475586,
+          37.51935958862305,
+          37.206016540527344
+        ],
+        "mean_ms": 37.562265396118164,
+        "std_ms": 0.6850111719340422,
+        "median_ms": 37.46201515197754,
+        "min_ms": 36.56294250488281,
+        "max_ms": 38.69900894165039
+      },
+      "fwdbwd_memory": {
+        "peak_allocated_bytes": 403703808,
+        "peak_reserved_bytes": 715128832
+      }
+    }
+  ]
+}
